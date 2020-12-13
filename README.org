@@ -18,6 +18,14 @@ Be sure to edit the ~config.py~ to change the ~ext_media_command~ variable if yo
 By defaults it makes ~anime~ directory in your home and stores it there.
 You can symlink your anime storage directory to home too. 
 
+* Screenshots
+
+[[./screenshots/info.png]]
+
+[[./screenshots/search.png]]
+
+[[./screenshots/watch.png]]
+
 * Known Bugs
 - Sometimes the mpv can't stream the stream link obtained with 403: Forbidden error.
 - The quality selection doesn't always work.

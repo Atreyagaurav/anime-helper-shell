@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 import cmd
-import commands
 import sys
 
+import commands
+import utils
 
 class GGshell(cmd.Cmd):
     prompt = "gogoanime >>"
@@ -12,8 +13,8 @@ class GGshell(cmd.Cmd):
         pass
 
     def completedefault(self, text, line, start, end):
-        lists = set(commands.read_log().keys()).union(
-            set(commands.read_cache(complete=True)))
+        lists = set(utils.read_log().keys()).union(
+            set(utils.read_cache(complete=True)))
         pname = line.split()[-1]
         plen = len(pname)
         match = filter(lambda t: t.startswith(pname), lists)
@@ -28,7 +29,14 @@ class GGshell(cmd.Cmd):
 USAGE: url [GOGOANIME-URL]
         GOGOANIME-URL : Url of the episode from gogoanime website.
 """
-        commands.download_from_url(inp.split())
+        commands.download_from_url(inp)
+
+    def do_streamurl(self, inp):
+        """Streams the anime episode from given gogoanime url
+USAGE: streamurl [GOGOANIME-URL]
+        GOGOANIME-URL : Url of the episode from gogoanime website.
+"""
+        commands.stream_from_url(inp)
 
     def complete_url(self, text, line, *ignored):
         url = commands.get_anime_url('')
@@ -36,6 +44,9 @@ USAGE: url [GOGOANIME-URL]
             return self.completedefault(text, line.split('/')[-1], *ignored)
         else:
             return [commands.get_anime_url('')]
+
+    def complete_streamurl(self, *args):
+        return self.complete_url(*args)
 
     def do_download(self, inp):
         """Download the anime episodes in given range

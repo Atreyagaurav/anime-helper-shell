@@ -25,7 +25,7 @@ def play_anime(args):
     name, episodes = read_args(args)
     for e in episodes:
         url = gogoanime.get_episode_url(name, e)
-        gogoanime.stream_from_url(url, name, e)
+        stream_from_url(url, name, e)
 
 
 def update_log(args):
@@ -50,7 +50,7 @@ def download_anime(args):
     name, episodes = read_args(args)
     for e in episodes:
         url = gogoanime.get_episode_url(name, e)
-        gogoanime.download_from_url(url, name, e)
+        download_from_url(url, name, e)
 
 
 def check_anime(args):
