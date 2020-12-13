@@ -11,7 +11,15 @@ I created this solution. It's not super useful, or the best, but it works fine f
 - Record list of watched anime
 
 * Installation
-Clone this repository. Make the ~ggshell.py~ executable and then symlink it to ~/usr/local/bin~ or other ~bin~ directory. 
+Clone this repository. 
+
+Install the requirements.
+
+#+begin_src bash
+pip install -r requirements.txt
+#+end_src
+
+Make the ~ggshell.py~ executable and then symlink it to ~/usr/local/bin~ or other ~bin~ directory. 
 
 Be sure to edit the ~config.py~ to change the ~ext_media_command~ variable if you use other players than ~mpv~, and change the ~anime_dir~ to the place you want to store your anime.
 

@@ -1,0 +1,5 @@
+pycurl
+m3u8
+requests
+beautifulsoup4
+html2text
