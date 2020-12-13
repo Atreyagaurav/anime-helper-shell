@@ -1,0 +1,41 @@
+import os
+from string import Template
+
+QUALITY_PREFERENCE = 720
+
+gogoanime_url = 'https://gogoanime.so'
+
+ajax_t = Template('https://gogo-stream.com/ajax.php?${q}')
+
+ext_player_command = [
+    'mpv', '--geometry=300-0-20', '--on-all-workspaces', '--no-config'
+]
+
+anime_dir = os.path.abspath('/home/gaurav/anime')
+
+cachefile = os.path.join(anime_dir, ".cachefile")
+logfile = os.path.join(anime_dir, ".anime_history")
+
+episode_t = Template("${anime}-episode-${ep}")
+anime_t = Template("category/${anime}")
+resume_t = Template("Range: bytes=${size}-")
+search_t = Template("https://gogoanime.so//search.html?keyword=${name}")
+search_page_t = Template(
+    "https://gogoanime.so//search.html?keyword=${name}&page=${page}")
+
+req_headers = {
+    "User-Agent":
+    "Mozilla/5.0 (X11; Linux x86_64; rv:82.0) Gecko/20100101 Firefox/82.0",
+    "Accept":
+    "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.5",
+    "Upgrade-Insecure-Requests": "1"
+}
+
+down_headers = {
+    "User-Agent":
+    "Mozilla/5.0 (X11; Linux x86_64; rv:82.0) Gecko/20100101 Firefox/82.0",
+    "Accept":
+    "video/webm,video/ogg,video/*;q=0.9,application/ogg;q=0.7,audio/*;q=0.6,*/*;q=0.5",
+    "Accept-Language": "en-US,en;q=0.5",
+}
