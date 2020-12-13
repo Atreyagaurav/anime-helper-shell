@@ -91,7 +91,6 @@ def read_args(args, episodes=True):
     if not name:
         print('Numbers choice invalid, or invalid context.')
         raise SystemExit
-    os.makedirs(os.path.join(config.anime_dir, f'./{name}'), exist_ok=True)
 
     if not episodes:
         return name
@@ -161,6 +160,8 @@ def anime_info(args):
 def download_from_url(gogo_url, anime_name=None, episode=None):
     if not anime_name or not episode:
         anime_name, episode = gogoanime.parse_gogo_url(gogo_url)
+    os.makedirs(os.path.join(config.anime_dir, f'./{anime_name}'),
+                exist_ok=True)
     print('Downloading:', gogo_url)
     durl, ext = gogoanime.get_direct_video_url(gogo_url)
     if not durl:

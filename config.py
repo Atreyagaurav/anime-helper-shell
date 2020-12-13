@@ -11,7 +11,10 @@ ext_player_command = [
     'mpv', '--geometry=300-0-20', '--on-all-workspaces', '--no-config'
 ]
 
-anime_dir = os.path.abspath('/home/gaurav/anime')
+home = os.getenv('HOME')
+anime_dir = os.path.abspath(os.path.join(home, './anime'))
+
+os.makedirs(anime_dir, exist_ok=True)
 
 cachefile = os.path.join(anime_dir, ".cachefile")
 logfile = os.path.join(anime_dir, ".anime_history")
