@@ -1,13 +1,43 @@
 #!/usr/bin/env python
 import cmd
 import sys
+import os
+import subprocess
 
 import commands
 import utils
+import config
 
 class GGshell(cmd.Cmd):
+    # These are overriden from cmd.Cmd
     prompt = "gogoanime >>"
     indentchars = cmd.IDENTCHARS
+
+    def onecmd(self, ind):
+        try:
+            return super().onecmd(ind)
+        except KeyboardInterrupt:
+            print('Interrupted.')
+            pass
+
+    def preloop(self):
+        try:
+            import readline
+            if os.path.exists(config.historyfile):
+                readline.read_history_file(config.historyfile)
+            self.old_completers = readline.get_completer_delims()
+            readline.set_completer_delims(self.old_completers.replace('-',''))
+        except ImportError:
+            pass
+
+    def postloop(self):
+        try:
+            import readline
+            readline.set_history_length(1000)
+            readline.write_history_file(config.historyfile)
+            readline.set_completer_delims(self.old_completers)
+        except ImportError:
+            pass
 
     def emptyline(self):
         pass
@@ -15,14 +45,25 @@ class GGshell(cmd.Cmd):
     def completedefault(self, text, line, start, end):
         lists = set(utils.read_log().keys()).union(
             set(utils.read_cache(complete=True)))
-        pname = line.split()[-1]
-        plen = len(pname)
-        match = filter(lambda t: t.startswith(pname), lists)
-        return list(map(lambda l: l[plen - len(text):], match))
+        match = filter(lambda t: t.startswith(text), lists)
+        return list(match)
+
+    # From here my commands start
 
     def do_exit(self, inp):
         """Exit this interactive shell."""
         return True
+
+    def do_history(self, inp):
+        self.postloop()
+        with open(config.historyfile,'r') as r:
+            for i,h in enumerate(r):
+                print(f'{i+1:3d}:  {h}', end = "")
+
+    def do_shell(self, inp):
+        """Execute shell commands
+        """
+        subprocess.call(inp, shell=True)
 
     def do_url(self, inp):
         """Downloads the anime episode from given gogoanime url
@@ -196,9 +237,11 @@ Example Usage:
 """)
 
 
+
 if __name__ == '__main__':
     if len(sys.argv) == 1:
-        GGshell().cmdloop(
+        gshell = GGshell()
+        gshell.cmdloop(
             """Welcome, This is the CLI interactive for gogoanime.
 Type help for more."""
         )

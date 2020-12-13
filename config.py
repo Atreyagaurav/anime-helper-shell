@@ -17,6 +17,7 @@ anime_dir = os.path.abspath(os.path.join(home, './anime'))
 os.makedirs(anime_dir, exist_ok=True)
 
 cachefile = os.path.join(anime_dir, ".cachefile")
+historyfile = os.path.join(anime_dir, ".shell_history")
 logfile = os.path.join(anime_dir, ".anime_history")
 
 episode_t = Template("${anime}-episode-${ep}")
