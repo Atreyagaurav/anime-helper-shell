@@ -19,9 +19,14 @@ class GGshell(cmd.Cmd):
     def onecmd(self, ind):
         try:
             return super().onecmd(ind)
-        except KeyboardInterrupt:
-            print('Interrupted.')
-            pass
+        except (SystemExit, KeyboardInterrupt):
+            print()
+
+    def cmdloop(self, intro):
+        try:
+            return super().cmdloop(intro)
+        except (KeyboardInterrupt,):
+            print("KeyboardInterruption...")
 
     def preloop(self):
         try:
