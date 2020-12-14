@@ -14,19 +14,70 @@ import config
 class GGshell(cmd.Cmd):
     # These are overriden from cmd.Cmd
     prompt = "gogoanime >>"
-    indentchars = cmd.IDENTCHARS
 
     def onecmd(self, ind):
+        if ind == 'EOF':
+            print()
+            return
         try:
             return super().onecmd(ind)
         except (SystemExit, KeyboardInterrupt):
             print()
 
-    def cmdloop(self, intro):
+    def cmdloop(self, intro=None):
+        """Repeatedly issue a prompt, accept input, parse an initial prefix
+        off the received input, and dispatch to action methods, passing them
+        the remainder of the line as argument.
+
+        """
+
+        self.preloop()
+        if self.use_rawinput and self.completekey:
+            try:
+                import readline
+                self.old_completer = readline.get_completer()
+                readline.set_completer(self.complete)
+                readline.parse_and_bind(self.completekey+": complete")
+            except ImportError:
+                pass
         try:
-            return super().cmdloop(intro)
-        except (KeyboardInterrupt,):
-            print("KeyboardInterruption...")
+            if intro is not None:
+                self.intro = intro
+            if self.intro:
+                self.stdout.write(str(self.intro)+"\n")
+            stop = None
+            while not stop:
+                if self.cmdqueue:
+                    line = self.cmdqueue.pop(0)
+                else:
+                    try:
+                        if self.use_rawinput:
+                            try:
+                                line = input(self.prompt)
+                            except EOFError:
+                                line = 'EOF'
+                        else:
+                            self.stdout.write(self.prompt)
+                            self.stdout.flush()
+                            line = self.stdin.readline()
+                            if not len(line):
+                                line = 'EOF'
+                            else:
+                                line = line.rstrip('\r\n')
+                    except KeyboardInterrupt:
+                        print('\n^C')
+                        continue
+                line = self.precmd(line)
+                stop = self.onecmd(line)
+                stop = self.postcmd(stop, line)
+            self.postloop()
+        finally:
+            if self.use_rawinput and self.completekey:
+                try:
+                    import readline
+                    readline.set_completer(self.old_completer)
+                except ImportError:
+                    pass
 
     def preloop(self):
         try:
