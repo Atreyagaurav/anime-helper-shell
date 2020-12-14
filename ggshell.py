@@ -86,9 +86,8 @@ USAGE: streamurl [GOGOANIME-URL]
     def complete_url(self, text, line, *ignored):
         lists = set(utils.read_log().keys()).union(
             set(utils.read_cache(complete=True)))
-        urls = map(gogoanime.get_anime_url, lists)
-        match = filter(lambda t: t.startswith(text),
-                       map(lambda url: f'{url}-episode-', urls))
+        urls = map(lambda name: gogoanime.get_episode_url(name,''), lists)
+        match = filter(lambda t: t.startswith(text),urls)
         return list(match)
 
     def complete_streamurl(self, *args):
