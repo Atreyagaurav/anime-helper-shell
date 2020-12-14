@@ -3,10 +3,13 @@ import cmd
 import sys
 import os
 import subprocess
+import re
 
 import commands
+import gogoanime
 import utils
 import config
+
 
 class GGshell(cmd.Cmd):
     # These are overriden from cmd.Cmd
@@ -26,7 +29,8 @@ class GGshell(cmd.Cmd):
             if os.path.exists(config.historyfile):
                 readline.read_history_file(config.historyfile)
             self.old_completers = readline.get_completer_delims()
-            readline.set_completer_delims(self.old_completers.replace('-',''))
+            readline.set_completer_delims(
+                re.sub(r'-|:|/', '', self.old_completers))
         except ImportError:
             pass
 
@@ -56,9 +60,9 @@ class GGshell(cmd.Cmd):
 
     def do_history(self, inp):
         self.postloop()
-        with open(config.historyfile,'r') as r:
-            for i,h in enumerate(r):
-                print(f'{i+1:3d}:  {h}', end = "")
+        with open(config.historyfile, 'r') as r:
+            for i, h in enumerate(r):
+                print(f'{i+1:3d}:  {h}', end="")
 
     def do_shell(self, inp):
         """Execute shell commands
@@ -80,11 +84,12 @@ USAGE: streamurl [GOGOANIME-URL]
         commands.stream_from_url(inp)
 
     def complete_url(self, text, line, *ignored):
-        url = commands.get_anime_url('')
-        if url in line:
-            return self.completedefault(text, line.split('/')[-1], *ignored)
-        else:
-            return [commands.get_anime_url('')]
+        lists = set(utils.read_log().keys()).union(
+            set(utils.read_cache(complete=True)))
+        urls = map(gogoanime.get_anime_url, lists)
+        match = filter(lambda t: t.startswith(text),
+                       map(lambda url: f'{url}-episode-', urls))
+        return list(match)
 
     def complete_streamurl(self, *args):
         return self.complete_url(*args)
@@ -237,13 +242,10 @@ Example Usage:
 """)
 
 
-
 if __name__ == '__main__':
     if len(sys.argv) == 1:
         gshell = GGshell()
-        gshell.cmdloop(
-            """Welcome, This is the CLI interactive for gogoanime.
-Type help for more."""
-        )
+        gshell.cmdloop("""Welcome, This is the CLI interactive for gogoanime.
+Type help for more.""")
     else:
         GGshell().onecmd(" ".join(sys.argv[1:]))

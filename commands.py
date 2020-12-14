@@ -76,16 +76,15 @@ def read_args(args, episodes=True):
         name = utils.read_cache()
     elif args[0].isnumeric():
         name = utils.read_cache(int(args[0]))
-        print(name)
+        print(f'Name:{name}')
     elif '/' in args[0]:
         name = args[0].strip('/').split('/')[-1]
     else:
         name = gogoanime.process_anime_name(args[0])
-        if not os.path.exists(os.path.join(
-                config.anime_dir, f'./{name}')) and not utils.get_soup(
+        if not utils.read_log(name) and name not in utils.read_cache(
+                complete=True) and not utils.get_soup(
                     gogoanime.get_anime_url(name)):
-            print(
-                f'Anime with name doesn\'t exist: {" ".join(name.split("-"))}')
+            print(f'Anime with the name doesn\'t exist: {args[0]}')
             raise SystemExit
 
     if not name:
@@ -145,6 +144,10 @@ def search_anime(args):
                                                   page=list_item.a.text)
             soup = utils.get_soup(url)
             search_results(soup)
+
+
+def import_from_mal(username):
+    pass
 
 
 def anime_info(args):
