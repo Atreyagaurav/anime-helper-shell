@@ -14,6 +14,10 @@ import config
 class GGshell(cmd.Cmd):
     # These are overriden from cmd.Cmd
     prompt = "gogoanime >>"
+    # to have '-' character in my commands
+    identchars = cmd.Cmd.identchars + '-'
+    ruler = '-'
+    misc_header = 'Other Help Topics'
 
     def onecmd(self, ind):
         if ind == 'EOF':
@@ -37,14 +41,14 @@ class GGshell(cmd.Cmd):
                 import readline
                 self.old_completer = readline.get_completer()
                 readline.set_completer(self.complete)
-                readline.parse_and_bind(self.completekey+": complete")
+                readline.parse_and_bind(self.completekey + ": complete")
             except ImportError:
                 pass
         try:
             if intro is not None:
                 self.intro = intro
             if self.intro:
-                self.stdout.write(str(self.intro)+"\n")
+                self.stdout.write(str(self.intro) + "\n")
             stop = None
             while not stop:
                 if self.cmdqueue:
@@ -108,6 +112,12 @@ class GGshell(cmd.Cmd):
         match = filter(lambda t: t.startswith(text), lists)
         return list(match)
 
+    def do_help(self, topic):
+        if len(topic) == 0:
+            import __init__
+            print(__init__.__doc__)
+        super().do_help(topic)
+
     # From here my commands start
 
     def do_exit(self, inp):
@@ -142,8 +152,8 @@ USAGE: streamurl [GOGOANIME-URL]
     def complete_url(self, text, line, *ignored):
         lists = set(utils.read_log().keys()).union(
             set(utils.read_cache(complete=True)))
-        urls = map(lambda name: gogoanime.get_episode_url(name,''), lists)
-        match = filter(lambda t: t.startswith(text),urls)
+        urls = map(lambda name: gogoanime.get_episode_url(name, ''), lists)
+        match = filter(lambda t: t.startswith(text), urls)
         return list(match)
 
     def complete_streamurl(self, *args):
@@ -229,72 +239,6 @@ Do not use this when simple commands like ls and tree are enough, as it
 also checks the file online to make sure extensions match.
         """
         commands.check_anime(inp.split())
-
-    def help_animename(self, *args):
-        print("""
-ANIME-NAME   - Name of the anime or url or choice number.
-               It must be same as the name on gogoanime address bar unless
-                 you are searching anime, or using the results from search.
-               If you exclude this argument, the first choice from last
-                 listed animes or the anime last played/downloaded will
-                 be used. (first line of anime cachefile)
-               You can put a choice number starting from 0 if you want to
-                 choose any anime from last anime lists. Like from results
-                 of 'search' command.
-        """)
-
-    def help_episodesrange(self, *args):
-        print("""
-RANGE   - Range of the episodes; defaults to all episodes if not
-            specified.
-          For 'continue' command, defaults to unwatched episodes.""")
-
-    def help_summary(self, *args):
-        print("""Command Line Interface for anime available in gogoanime
- website.
-
-Usage: COMMAND [ANIME-NAME] [RANGE]
-
-Launching with no arguments will launch an interactive interface.
-
-COMMAND    - Command to execute, see details below for available commands.
-ANIME-NAME - Name of the anime or url or choice number.
-             It must be same as the name on gogoanime address bar unless
-               you are searching anime, or using the results from search.
-             If you exclude this argument, the first choice from last
-               listed animes or the anime last played/downloaded will
-               be used. (first line of anime cachefile)
-             You can put a choice number starting from 0 if you want to
-               choose any anime from last anime lists. Like from results
-               of 'search' command.
-RANGE      - Range of the episodes; defaults to all episodes if not
-               specified.
-             For 'continue' command, defaults to unwatched episodes.
-
-AVAILABLE COMMANDS:
-help     - Display this message.
-url      - Download the video from provided URL.
-download - Download specified anime(episodes).
-check    - Check if specified anime(episodes) has missing episodes files.
-           Do not use this when simple commands like tree or ls can give
-          you information as this command checks the files online.
-list     - Just list the available episodes range.
-play     - Play the episodes in mpv.
-continue - Continue playing given anime from your last watch.
-search   - Search the anime list from given name/keywords.
-info     - Get the information about the anime.
-log      - print the log. Regex for filtering the log can be given as an
-          argument.
-watched  - Add the episodes as watched in log, if you watched them elsewhere.
-
-Example Usage:
-    check one-piece 1-10
-    download one-piece 1-2,5
-    info one-piece
-    search "One Piece Movie"
-    list https://gogoanime.so/category/one-piece
-    url https://gogoanime.so/one-piece-episode-1
-""")
 
 
 if __name__ == '__main__':
