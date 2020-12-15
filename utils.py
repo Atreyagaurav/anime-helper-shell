@@ -77,14 +77,12 @@ def download_m3u8(url, filepath, replace=False):
 def get_m3u8_stream(m3u8_url):
     media = m3u8.load(m3u8_url)
     if media.data['is_variant']:
-        first = False
+        flag = False
         for p in media.playlists:
-            if not first:
+            if (p.stream_info.resolution[1] <=
+                    config.QUALITY_PREFERENCE) or (not flag):
                 m3u8_url = p.absolute_uri
-            elif p.stream_info.resolution[1] > config.QUALITY_PREFERENCE:
-                break
-            else:
-                m3u8_url = p.absolute_uri
+                flag = True
     return m3u8_url
 
 
