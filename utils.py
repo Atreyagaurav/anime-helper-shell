@@ -1,4 +1,6 @@
 import os
+import re
+import math
 import pycurl
 import m3u8
 import requests
@@ -108,14 +110,16 @@ def clear_cache():
         os.remove(config.cachefile)
 
 
-def read_log(anime_name=None):
+def read_log(anime_name=None, number=math.inf, pattern=re.compile(r'.*')):
     if not os.path.exists(config.logfile):
         log = dict()
     else:
         log = {
-            line[0]: line[1]
-            for line in (li.strip().split()
-                         for li in open(config.logfile, 'r'))
+            line[0]: " ".join(line[1:])
+            for i, line in enumerate(li.strip().split()
+                                     for li in open(config.logfile, 'r')
+                                     if pattern.match(li.split()[0]))
+            if i < number
         }
     if not anime_name:
         return log

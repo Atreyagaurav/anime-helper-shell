@@ -125,15 +125,23 @@ class GGshell(cmd.Cmd):
         return True
 
     def do_history(self, inp):
+        """show the history of the commands.
+        """
         self.postloop()
         with open(config.historyfile, 'r') as r:
             for i, h in enumerate(r):
-                print(f'{i+1:3d}:  {h}', end="")
+                if re.match(inp,h):
+                    print(f'{i+1:3d}:  {h}', end="")
 
     def do_shell(self, inp):
         """Execute shell commands
         """
         subprocess.call(inp, shell=True)
+
+    def do_quality(self, inp):
+        """Sets the quality for the anime.
+        """
+        commands.set_quality(inp)
 
     def do_url(self, inp):
         """Downloads the anime episode from given gogoanime url
@@ -217,8 +225,9 @@ USAGE: search [KEYWORDS]
         """Display the log information.
 Pass Anime name or keywords to filter the log. (supports python regex)
 
-USAGE: log [KEYWORDS]
+USAGE: log [KEYWORDS] [NUMBER]
         KEYWORDS     : Name of the anime, or regex to filter the log.
+        NUMBER       : Number of log items to be shown.
         """
         commands.anime_log(inp.split())
 

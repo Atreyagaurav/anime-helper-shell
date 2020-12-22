@@ -11,12 +11,29 @@ import config
 import gogoanime
 import utils
 
+def set_quality(quality):
+    if quality.isnumeric():
+        config.QUALITY_PREFERENCE = int(quality)
+        return
+    elif quality.isalnum():
+        if re.match(r'[0-9]+p',quality):
+            config.QUALITY_PREFERENCE = int(quality[:-1])
+            return
+    print('Invalid quality format.')
+
 
 def anime_log(args):
     print('Watched:\tAnime Name:')
-    logs = utils.read_log().items()
-    if len(args) == 1:
-        logs = filter(lambda kv: re.match(args[0], kv[0]), logs)
+    log_args = dict()
+    if len(args)==0:
+        pass
+    elif args[0].isnumeric():
+        log_args['number']=int(args[0])
+    else:
+        log_args['pattern']=re.compile(args[0])
+        if len(args)==2:
+            log_args['number']=int(args[1])
+    logs = utils.read_log(**log_args).items()
     for k, v in logs:
         print(f'{v}\t\t{k}')
 
@@ -81,9 +98,7 @@ def read_args(args, episodes=True):
         name = args[0].strip('/').split('/')[-1]
     else:
         name = gogoanime.process_anime_name(args[0])
-        if not utils.read_log(name) and name not in utils.read_cache(
-                complete=True) and not utils.get_soup(
-                    gogoanime.get_anime_url(name)):
+        if not gogoanime.verify_anime_exists(name):
             print(f'Anime with the name doesn\'t exist: {args[0]}')
             raise SystemExit
 
@@ -194,12 +209,33 @@ def stream_from_url(url, anime_name=None, episode=None):
         print("m3u8 file found")
         durl = utils.get_m3u8_stream(durl)
     print(f'Stream link: {durl}')
-    if input('Start mpv?<Y/n>:') == 'n':
+    try:
+        for i in range(20):
+            print(f'\rOpening External Player in: {2-i/10:1.1f} sec.',end='')
+            time.sleep(0.1)
+    except KeyboardInterrupt:
+        print('\nExiting...')
         raise SystemExit
-    t1 = time.time()
-    subprocess.call(" ".join(config.ext_player_command + [durl]), shell=True)
-    if (time.time() - t1) > (
-            5 * 60
-    ):  # 5 minutes watchtime at least, otherwise consider it unwatched
-        utils.write_log(anime_name, episode)
-        utils.write_cache(anime_name)
+    # if input('Start mpv?<Y/n>:') == 'n':
+    #     raise SystemExit
+    print('\rOpening External Player....')
+    while True:
+        t1 = time.time()
+        ret_val = subprocess.call(" ".join(config.ext_player_command + [durl]), shell=True)
+        if ret_val==2:
+            print('Couldn\'t open the stream.')
+            if input("retry?<Y/n>")=='':
+                continue
+        if (time.time() - t1) > (
+                5 * 60
+        ):  # 5 minutes watchtime at least, otherwise consider it unwatched
+            utils.write_log(anime_name, episode)
+            utils.write_cache(anime_name)
+        return
+
+def track_anime(anime_name):
+    """Experimental"""
+    logs = utils.read_log()
+    if anime_name in logs:
+        episodes = logs[anime_name]
+        # TODO:

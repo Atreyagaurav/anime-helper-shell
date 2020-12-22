@@ -49,7 +49,9 @@ def get_episodes_range(anime_url):
         if rngs[0] == '0':
             rngs[0] = '1'
         total_rng.append('-'.join(rngs))
-    return ','.join(total_rng)
+    text = ','.join(total_rng)
+    parsed_rng = utils.compress_range(utils.extract_range(text))
+    return parsed_rng
 
 
 def parse_gogo_url(url):
@@ -62,3 +64,22 @@ def parse_gogo_url(url):
         print("URL couldn't be parsed.")
         raise SystemExit
     return anime_name, episode
+
+
+def verify_anime_exists(anime_name, verbose = False):
+    url = get_anime_url(anime_name)
+    soup = utils.get_soup(url)
+    if utils.read_log(anime_name) is not None:
+        if verbose:
+            print(f'LOG::{anime_name}')
+        return True
+    elif anime_name in utils.read_cache(complete=True):
+        if verbose:
+            print(f'CACHE::{anime_name}')
+        return True
+    elif utils.get_soup(get_anime_url(anime_name)) is not None:
+        if verbose:
+            print(f'SITE::{anime_name}')
+        return True
+    else:
+        return False
