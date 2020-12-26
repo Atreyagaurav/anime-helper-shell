@@ -165,6 +165,8 @@ def compress_range(range_list):
 
 
 def extract_range(range_str):
+    if range_str.strip()=='':
+        return iter()
     ranges = range_str.split(',')
     try:
         for r in ranges:

@@ -127,11 +127,14 @@ class GGshell(cmd.Cmd):
     def do_history(self, inp):
         """show the history of the commands.
         """
-        self.postloop()
-        with open(config.historyfile, 'r') as r:
-            for i, h in enumerate(r):
+        try:
+            import readline
+            for j in range(1,readline.get_current_history_length()+1):
+                h = readline.get_history_item(j)
                 if re.match(inp,h):
-                    print(f'{i+1:3d}:  {h}', end="")
+                    print(f'{j:3d}:  {h}')
+        except ImportError:
+            pass
 
     def do_shell(self, inp):
         """Execute shell commands
@@ -142,6 +145,19 @@ class GGshell(cmd.Cmd):
         """Sets the quality for the anime.
         """
         commands.set_quality(inp)
+
+    def do_geometry(self, inp):
+        """Sets the geometry for the external player.
+        """
+        commands.set_geometry(inp)
+
+    def do_fullscreen(self, inp):
+        """Toggles the fullscreen setting for external player.
+        """
+        commands.toggle_fullscreen(inp)
+
+    def complete_fullscreen(*args):
+        return ['yes','no','on','off']
 
     def do_url(self, inp):
         """Downloads the anime episode from given gogoanime url

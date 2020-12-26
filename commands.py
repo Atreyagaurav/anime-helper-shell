@@ -11,28 +11,49 @@ import config
 import gogoanime
 import utils
 
+
 def set_quality(quality):
     if quality.isnumeric():
         config.QUALITY_PREFERENCE = int(quality)
-        return
     elif quality.isalnum():
-        if re.match(r'[0-9]+p',quality):
+        if re.match(r'[0-9]+p', quality):
             config.QUALITY_PREFERENCE = int(quality[:-1])
-            return
-    print('Invalid quality format.')
+    else:
+        print('Invalid quality format.')
+
+
+def toggle_fullscreen(value):
+    if value.lower() in ['on', 'yes']:
+        config.fullscreen = True
+        config.compile_ext_player_command()
+    elif value.lower() in ['off', 'no']:
+        config.fullscreen = False
+        config.compile_ext_player_command()
+    else:
+        print(f'Incorrect Argument: {value}')
+    print(f'External Player command: {" ".join(config.ext_player_command)}')
+
+
+def set_geometry(value):
+    if re.match(r'^([0-9]+-?)+$', value):
+        config.geometry = value
+        config.compile_ext_player_command()
+    else:
+        print(f'Incorrect Argument: {value}')
+    print(f'External Player command: {" ".join(config.ext_player_command)}')
 
 
 def anime_log(args):
     print('Watched:\tAnime Name:')
     log_args = dict()
-    if len(args)==0:
+    if len(args) == 0:
         pass
     elif args[0].isnumeric():
-        log_args['number']=int(args[0])
+        log_args['number'] = int(args[0])
     else:
-        log_args['pattern']=re.compile(args[0])
-        if len(args)==2:
-            log_args['number']=int(args[1])
+        log_args['pattern'] = re.compile(args[0])
+        if len(args) == 2:
+            log_args['number'] = int(args[1])
     logs = utils.read_log(**log_args).items()
     for k, v in logs:
         print(f'{v}\t\t{k}')
@@ -211,7 +232,7 @@ def stream_from_url(url, anime_name=None, episode=None):
     print(f'Stream link: {durl}')
     try:
         for i in range(20):
-            print(f'\rOpening External Player in: {2-i/10:1.1f} sec.',end='')
+            print(f'\rOpening External Player in: {2-i/10:1.1f} sec.', end='')
             time.sleep(0.1)
     except KeyboardInterrupt:
         print('\nExiting...')
@@ -221,10 +242,11 @@ def stream_from_url(url, anime_name=None, episode=None):
     print('\rOpening External Player....')
     while True:
         t1 = time.time()
-        ret_val = subprocess.call(" ".join(config.ext_player_command + [durl]), shell=True)
-        if ret_val==2:
+        ret_val = subprocess.call(" ".join(config.ext_player_command + [durl]),
+                                  shell=True)
+        if ret_val == 2:
             print('Couldn\'t open the stream.')
-            if input("retry?<Y/n>")=='':
+            if input("retry?<Y/n>") == '':
                 continue
         if (time.time() - t1) > (
                 5 * 60
@@ -232,6 +254,7 @@ def stream_from_url(url, anime_name=None, episode=None):
             utils.write_log(anime_name, episode)
             utils.write_cache(anime_name)
         return
+
 
 def track_anime(anime_name):
     """Experimental"""
