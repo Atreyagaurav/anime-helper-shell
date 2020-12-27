@@ -126,9 +126,9 @@ def read_log(anime_name=None, number=math.inf, pattern=re.compile(r'.*')):
     return log.get(anime_name)
 
 
-def write_log(anime_name, episodes):
+def write_log(anime_name, episodes, append=True):
     log = read_log()
-    if anime_name in log:
+    if anime_name in log and append:
         log[anime_name] = compress_range(
             extract_range(f'{log[anime_name]},{episodes}'))
     else:

@@ -219,6 +219,15 @@ USAGE: watched [ANIME-NAME] [EPISODES-RANGE]
         """
         commands.update_log(inp.split())
 
+    def do_edit(self, inp):
+        """Edit the log so that the given anime (& episodes) replace the previous log information with new.
+
+USAGE: edit [ANIME-NAME] [EPISODES-RANGE]
+        ANIME-NAME     : Name of the anime, or choice number; defaults to 0
+        EPISODES-RANGE : Range of the episodes, defaults to all
+        """
+        commands.edit_log(inp.split())
+
     def do_continue(self, inp):
         """Play the given anime's unwatched episodes from the start.
 

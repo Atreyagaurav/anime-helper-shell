@@ -71,6 +71,11 @@ def update_log(args):
     utils.write_log(anime_name, utils.compress_range(episodes))
 
 
+def edit_log(args):
+    anime_name, episodes = read_args(args)
+    utils.write_log(anime_name, utils.compress_range(episodes), append=False)
+
+
 def continue_play(args):
     name, episodes = read_args(args)
     watched = utils.read_log().get(name)
