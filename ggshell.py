@@ -146,6 +146,11 @@ class GGshell(cmd.Cmd):
         """
         commands.set_quality(inp)
 
+    def complete_quality(self, text, *ignored):
+        possibilities = ['360p','480p','720p','1080p']
+        match = filter(lambda t: t.startswith(text), possibilities)
+        return list(match)
+
     def do_geometry(self, inp):
         """Sets the geometry for the external player.
         """
@@ -156,8 +161,10 @@ class GGshell(cmd.Cmd):
         """
         commands.toggle_fullscreen(inp)
 
-    def complete_fullscreen(*args):
-        return ['yes','no','on','off']
+    def complete_fullscreen(self, text, *ignored):
+        possibilities = ['yes','no','on','off']
+        match = filter(lambda t: t.startswith(text), possibilities)
+        return list(match)
 
     def do_url(self, inp):
         """Downloads the anime episode from given gogoanime url
