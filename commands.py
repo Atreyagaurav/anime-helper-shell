@@ -255,15 +255,71 @@ def stream_from_url(url, anime_name=None, episode=None):
                 continue
         if (time.time() - t1) > (
                 5 * 60
-        ):  # 5 minutes watchtime at least, otherwise consider it unwatched
+        ):  # 5 minutes watchtime at least, otherwise consider it unwatched.
+            # TODO: use direct communication with mpv to know if episode was watched.
             utils.write_log(anime_name, episode)
+            utils.update_tracklist(anime_name, episode)
             utils.write_cache(anime_name)
         return
 
 
-def track_anime(anime_name):
-    """Experimental"""
-    logs = utils.read_log()
-    if anime_name in logs:
-        episodes = logs[anime_name]
-        # TODO:
+def track_anime(args):
+    """Put an anime into the track list"""
+    anime_name, episodes = read_args(args)
+    watched_episodes = utils.read_log(anime_name)
+    if watched_episodes is None:
+        episodes = utils.compress_range(episodes)
+    else:
+        print(f'Watched: {watched_episodes}')
+        episodes = watched_episodes
+    utils.write_log(anime_name,
+                    episodes,
+                    append=False,
+                    logfile=config.ongoingfile)
+
+
+def untrack_anime(anime_name):
+    """Remove an anime from the track list"""
+    anime_list = utils.read_log(logfile=config.ongoingfile)
+    if anime_name in anime_list:
+        anime_list.pop(anime_name)
+    else:
+        return
+    with open(config.ongoingfile, 'w') as w:
+        for k, v in anime_list.items():
+            w.write(f'{k} {v}\n')
+
+
+def list_tracked():
+    anime_list = utils.read_log(logfile=config.ongoingfile)
+    for anime, episodes in anime_list.items():
+        print(f'{anime} : {episodes}')
+
+
+def get_updates(anime_name=''):
+    """Check and display the updates on the tracked anime list."""
+    if anime_name == '':
+        anime_list = utils.read_log(logfile=config.ongoingfile)
+    else:
+        anime_list = {
+            anime_name:
+            utils.read_log(anime_name=anime_name, logfile=config.ongoingfile)
+        }
+    updates = {}
+    for anime, episodes in anime_list.items():
+        new_episodes = gogoanime.get_episodes_range(
+            gogoanime.get_anime_url(anime))
+        new = set(utils.extract_range(new_episodes)).difference(
+            set(utils.extract_range(episodes)))
+        if len(new) > 0:
+            updates[anime] = new
+    if len(updates) == 0:
+        print("No new episodes released.")
+        return
+    if anime_name == '':
+        print(f'{len(updates)} animes has new episodes.')
+        print('-' * 50)
+    for anime, episodes in updates.items():
+        print(
+            f'{anime}: {len(episodes)} new episodes ({utils.compress_range(episodes)})'
+        )

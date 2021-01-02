@@ -67,8 +67,6 @@ def parse_gogo_url(url):
 
 
 def verify_anime_exists(anime_name, verbose = False):
-    url = get_anime_url(anime_name)
-    soup = utils.get_soup(url)
     if utils.read_log(anime_name) is not None:
         if verbose:
             print(f'LOG::{anime_name}')

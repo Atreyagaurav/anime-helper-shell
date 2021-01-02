@@ -5,6 +5,8 @@ import os
 import subprocess
 import re
 
+from requests.exceptions import ConnectionError, ConnectTimeout
+
 import commands
 import gogoanime
 import utils
@@ -27,6 +29,8 @@ class GGshell(cmd.Cmd):
             return super().onecmd(ind)
         except (SystemExit, KeyboardInterrupt):
             print()
+        except (ConnectionError, ConnectTimeout):
+            print('Slow or no Internet connection. Try again.')
 
     def cmdloop(self, intro=None):
         """Repeatedly issue a prompt, accept input, parse an initial prefix
@@ -129,9 +133,9 @@ class GGshell(cmd.Cmd):
         """
         try:
             import readline
-            for j in range(1,readline.get_current_history_length()+1):
+            for j in range(1, readline.get_current_history_length() + 1):
                 h = readline.get_history_item(j)
-                if re.match(inp,h):
+                if re.match(inp, h):
                     print(f'{j:3d}:  {h}')
         except ImportError:
             pass
@@ -147,7 +151,7 @@ class GGshell(cmd.Cmd):
         commands.set_quality(inp)
 
     def complete_quality(self, text, *ignored):
-        possibilities = ['360p','480p','720p','1080p']
+        possibilities = ['360p', '480p', '720p', '1080p']
         match = filter(lambda t: t.startswith(text), possibilities)
         return list(match)
 
@@ -162,9 +166,41 @@ class GGshell(cmd.Cmd):
         commands.toggle_fullscreen(inp)
 
     def complete_fullscreen(self, text, *ignored):
-        possibilities = ['yes','no','on','off']
+        possibilities = ['yes', 'no', 'on', 'off']
         match = filter(lambda t: t.startswith(text), possibilities)
         return list(match)
+
+    def do_untrack(self, inp):
+        """Put the given anime into the active track list.
+
+USAGE: untrack [ANIME-NAME]
+        ANIME-NAME     : Name of the anime
+        """
+        commands.untrack_anime(inp)
+
+    def do_track(self, inp):
+        """Put the given anime into the active track list.
+
+USAGE: track [ANIME-NAME] [EPISODES-RANGE]
+        ANIME-NAME     : Name of the anime, or choice number; defaults to 0
+        EPISODES-RANGE : Range of the episodes, defaults to all
+        """
+        commands.track_anime(inp.split())
+
+    def do_tracklist(self, inp):
+        """Lists all the animes on the track list.
+
+USAGE: tracklist
+        """
+        commands.list_tracked()
+
+    def do_updates(self, inp):
+        """Get the updates for new episode releases.
+
+USAGE: updates [ANIME-NAME]
+        ANIME-NAME     : Name of the anime
+        """
+        commands.get_updates(inp.strip())
 
     def do_url(self, inp):
         """Downloads the anime episode from given gogoanime url

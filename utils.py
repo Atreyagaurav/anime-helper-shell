@@ -110,14 +110,17 @@ def clear_cache():
         os.remove(config.cachefile)
 
 
-def read_log(anime_name=None, number=math.inf, pattern=re.compile(r'.*')):
-    if not os.path.exists(config.logfile):
+def read_log(anime_name=None,
+             number=math.inf,
+             pattern=re.compile(r'.*'),
+             logfile=config.logfile):
+    if not os.path.exists(logfile):
         log = dict()
     else:
         log = {
             line[0]: " ".join(line[1:])
             for i, line in enumerate(li.strip().split()
-                                     for li in open(config.logfile, 'r')
+                                     for li in open(logfile, 'r')
                                      if pattern.match(li.split()[0]))
             if i < number
         }
@@ -126,15 +129,24 @@ def read_log(anime_name=None, number=math.inf, pattern=re.compile(r'.*')):
     return log.get(anime_name)
 
 
-def write_log(anime_name, episodes, append=True):
-    log = read_log()
+def write_log(anime_name, episodes, append=True, logfile=config.logfile):
+    log = read_log(logfile=logfile)
     if anime_name in log and append:
         log[anime_name] = compress_range(
             extract_range(f'{log[anime_name]},{episodes}'))
     else:
         log[anime_name] = episodes
-    with open(config.logfile, 'w') as w:
+    with open(logfile, 'w') as w:
         w.writelines((f'{k} {v}\n' for k, v in log.items()))
+
+
+def update_tracklist(anime_name, episodes, append=True):
+    log = readl_log(logfile=config.ongoingfile)
+    if anime_name in log:
+        write_log(anime_name,
+                  episodes,
+                  append=append,
+                  logfile=config.ongoingfile)
 
 
 def compress_range(range_list):
@@ -165,7 +177,7 @@ def compress_range(range_list):
 
 
 def extract_range(range_str):
-    if range_str.strip()=='':
+    if range_str is None or range_str.strip() == '':
         return iter()
     ranges = range_str.split(',')
     try:
