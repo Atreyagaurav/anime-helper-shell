@@ -10,6 +10,7 @@ import html2text
 import config
 import gogoanime
 import utils
+import outputs
 
 
 def set_quality(quality):
@@ -18,8 +19,10 @@ def set_quality(quality):
     elif quality.isalnum():
         if re.match(r'[0-9]+p', quality):
             config.QUALITY_PREFERENCE = int(quality[:-1])
+        else:
+            outputs.prompt_val('Invalid quality format', quality, 'error')
     else:
-        print('Invalid quality format.')
+        outputs.normal_info(f'Current quality: {quality}')
 
 
 def toggle_fullscreen(value):
@@ -30,8 +33,9 @@ def toggle_fullscreen(value):
         config.fullscreen = False
         config.compile_ext_player_command()
     else:
-        print(f'Incorrect Argument: {value}')
-    print(f'External Player command: {" ".join(config.ext_player_command)}')
+        outputs.prompt_val('Incorrect Argument', value, 'error')
+    outputs.prompt_val('External Player command',
+                       " ".join(config.ext_player_command))
 
 
 def set_geometry(value):
@@ -39,12 +43,13 @@ def set_geometry(value):
         config.geometry = value
         config.compile_ext_player_command()
     else:
-        print(f'Incorrect Argument: {value}')
-    print(f'External Player command: {" ".join(config.ext_player_command)}')
+        outputs.prompt_val('Incorrect Argument', value, 'error')
+    outputs.prompt_val('External Player command',
+                       " ".join(config.ext_player_command))
 
 
 def anime_log(args):
-    print('Watched:\tAnime Name:')
+    outputs.bold_info('Watched\tAnime Name')
     log_args = dict()
     if len(args) == 0:
         pass
@@ -56,7 +61,7 @@ def anime_log(args):
             log_args['number'] = int(args[1])
     logs = utils.read_log(**log_args).items()
     for k, v in logs:
-        print(f'{v}\t\t{k}')
+        outputs.normal_info(f'{v}\t\t{k}')
 
 
 def play_anime(args):
@@ -68,7 +73,9 @@ def play_anime(args):
 
 def update_log(args):
     anime_name, episodes = read_args(args)
-    utils.write_log(anime_name, utils.compress_range(episodes))
+    episodes = utils.compress_range(episodes)
+    utils.write_log(anime_name, episodes)
+    utils.update_tracklist(anime_name, episodes)
 
 
 def edit_log(args):
@@ -79,7 +86,7 @@ def edit_log(args):
 def continue_play(args):
     name, episodes = read_args(args)
     watched = utils.read_log().get(name)
-    print(f'Watched: {watched}')
+    outputs.prompt_val('Watched', watched, 'success')
     if not watched:
         last = 0
     else:
@@ -101,7 +108,7 @@ def check_anime(args):
     unavail_eps = []
     for e in episodes:
         url = gogoanime.get_episode_url(name, e)
-        print('Testing:', url)
+        outputs.normal_info('Testing:', url)
         durl, ext = gogoanime.get_direct_video_url(url)
         if not durl:
             raise SystemExit('Url for the file not found')
@@ -109,9 +116,11 @@ def check_anime(args):
                 os.path.join(config.anime_dir, f'./{name}/ep{e:02d}.{ext}')):
             unavail_eps.append(e)
     if len(unavail_eps) == 0:
-        print('All episodes in given range are locally available')
+        outputs.success_info(
+            'All episodes in given range are locally available')
     else:
-        print(f'Missing episodes: {utils.compress_range(unavail_eps)}')
+        outputs.prompt_val('Missing episodes',
+                           utils.compress_range(unavail_eps), 'warning')
 
 
 def read_args(args, episodes=True):
@@ -119,32 +128,33 @@ def read_args(args, episodes=True):
         name = utils.read_cache()
     elif args[0].isnumeric():
         name = utils.read_cache(int(args[0]))
-        print(f'Name:{name}')
+        outputs.prompt_val('Name', name)
     elif '/' in args[0]:
         name = args[0].strip('/').split('/')[-1]
     else:
         name = gogoanime.process_anime_name(args[0])
         if not gogoanime.verify_anime_exists(name):
-            print(f'Anime with the name doesn\'t exist: {args[0]}')
+            outputs.prompt_val(f'Anime with the name doesn\'t exist', args[0],
+                               'error')
             raise SystemExit
 
     if not name:
-        print('Numbers choice invalid, or invalid context.')
+        outputs.error_info('Numbers choice invalid, or invalid context.')
         raise SystemExit
 
     if not episodes:
         return name
     if len(args) <= 1:
-        print('Episodes range not given defaulting to all')
+        outputs.warning_info('Episodes range not given defaulting to all')
         available_rng = gogoanime.get_episodes_range(
             gogoanime.get_anime_url(name))
-        print(f'Available episodes: {available_rng}')
+        outputs.prompt_val('Available episodes', available_rng)
         episodes = utils.extract_range(available_rng)
     elif len(args) == 2:
         episodes = utils.extract_range(args[1])
     else:
-        print('Too many arguments.\n')
-        print(__doc__)
+        outputs.error_info('Too many arguments.\n')
+        outputs.normal_info(__doc__)
         raise SystemExit
     return name, episodes
 
@@ -158,8 +168,8 @@ def list_episodes(args):
                 gogoanime.get_episodes_range(gogoanime.get_anime_url(name))))
         res = eps.intersection(avl_eps)
         result = utils.compress_range(res)
-        print(f'Available episodes: {result}')
-    print(f'Watched episodes: {utils.read_log(name)}')
+        outputs.prompt_val(f'Available episodes', result)
+    outputs.prompt_val(f'Watched episodes', utils.read_log(name), 'success')
     utils.write_cache(name)
 
 
@@ -175,8 +185,8 @@ def search_anime(args):
         for list_item in all_res.find_all('li'):
             an = list_item.p.a['href'].split('/')[-1]
             utils.write_cache(an, append=True)
-            print(an, end='  \t')
-            print(list_item.p.a.text)
+            outputs.normal_info(an, end='  \t')
+            outputs.normal_info(list_item.p.a.text)
 
     search_results(soup)
     if plist:
@@ -198,7 +208,7 @@ def anime_info(args):
     h = html2text.HTML2Text()
     h.ignore_links = True
     for t in info.find_all('p', {'class': 'type'}):
-        print(h.handle(t.decode_contents()), end="")
+        outputs.normal_info(h.handle(t.decode_contents()), end="")
 
 
 def download_from_url(gogo_url, anime_name=None, episode=None):
@@ -206,12 +216,12 @@ def download_from_url(gogo_url, anime_name=None, episode=None):
         anime_name, episode = gogoanime.parse_gogo_url(gogo_url)
     os.makedirs(os.path.join(config.anime_dir, f'./{anime_name}'),
                 exist_ok=True)
-    print('Downloading:', gogo_url)
+    outputs.prompt_val('Downloading', gogo_url)
     durl, ext = gogoanime.get_direct_video_url(gogo_url)
     if not durl:
-        raise SystemExit('Url for the file not found')
+        outputs.error_info('Url for the file not found')
+        raise SystemExit
     if ext == 'm3u8':
-        print("m3u8 file found")
         m3u8_url = utils.get_m3u8_stream(durl)
         utils.download_m3u8(
             m3u8_url,
@@ -227,32 +237,33 @@ def download_from_url(gogo_url, anime_name=None, episode=None):
 def stream_from_url(url, anime_name=None, episode=None):
     if not anime_name or not episode:
         anime_name, episode = gogoanime.parse_gogo_url(url)
-    print('Getting Streaming Link:', url)
+    outputs.normal_info('Getting Streaming Link:', url)
     durl, ext = gogoanime.get_direct_video_url(url)
     if not durl:
-        raise SystemExit('Url for the file not found')
+        outputs.error_info('Url for the file not found')
+        raise SystemExit
     if ext == 'm3u8':
-        print("m3u8 file found")
         durl = utils.get_m3u8_stream(durl)
-    print(f'Stream link: {durl}')
+    outputs.prompt_val(f'Stream link', durl, 'success')
     try:
-        for i in range(20):
-            print(f'\rOpening External Player in: {2-i/10:1.1f} sec.', end='')
+        for i in range(11):
+            outputs.normal_info(
+                f'\rOpening External Player in: {1-i/10:1.1f} sec.', end='')
             time.sleep(0.1)
     except KeyboardInterrupt:
-        print('\nExiting...')
+        outputs.warning_info('\nInturrupted, Exiting...')
         raise SystemExit
-    # if input('Start mpv?<Y/n>:') == 'n':
-    #     raise SystemExit
-    print('\rOpening External Player....')
+    outputs.normal_info()
     while True:
         t1 = time.time()
         ret_val = subprocess.call(" ".join(config.ext_player_command + [durl]),
                                   shell=True)
-        if ret_val == 2:
-            print('Couldn\'t open the stream.')
+        if ret_val == 2:  # mpv error code
+            outputs.error_info('Couldn\'t open the stream.')
             if input("retry?<Y/n>") == '':
                 continue
+            else:
+                raise SystemExit
         if (time.time() - t1) > (
                 5 * 60
         ):  # 5 minutes watchtime at least, otherwise consider it unwatched.
@@ -268,9 +279,11 @@ def track_anime(args):
     anime_name, episodes = read_args(args)
     watched_episodes = utils.read_log(anime_name)
     if watched_episodes is None:
+        outputs.warning_info(
+            'Log entry not found. Setting only new episodes for tracking.')
         episodes = utils.compress_range(episodes)
     else:
-        print(f'Watched: {watched_episodes}')
+        outputs.prompt_val(f'Watched', watched_episodes, 'success')
         episodes = watched_episodes
     utils.write_log(anime_name,
                     episodes,
@@ -293,7 +306,7 @@ def untrack_anime(anime_name):
 def list_tracked():
     anime_list = utils.read_log(logfile=config.ongoingfile)
     for anime, episodes in anime_list.items():
-        print(f'{anime} : {episodes}')
+        outputs.normal_info(f'{anime} : {episodes}')
 
 
 def get_updates(anime_name=''):
@@ -314,12 +327,17 @@ def get_updates(anime_name=''):
         if len(new) > 0:
             updates[anime] = new
     if len(updates) == 0:
-        print("No new episodes released.")
+        outputs.normal_info("No new episodes released.")
         return
     if anime_name == '':
-        print(f'{len(updates)} animes has new episodes.')
-        print('-' * 50)
+        outputs.prompt_val(f'anime(s) has new episodes.',
+                           len(updates),
+                           'success',
+                           sep=" ",
+                           reverse=True)
+        outputs.normal_info('-' * 50)
     for anime, episodes in updates.items():
-        print(
-            f'{anime}: {len(episodes)} new episodes ({utils.compress_range(episodes)})'
-        )
+        outputs.normal_info(anime, end='\n\t')
+        outputs.success_tag(len(episodes), end=' ')
+        outputs.prompt_val('new episodes', utils.compress_range(episodes),
+                           'success')

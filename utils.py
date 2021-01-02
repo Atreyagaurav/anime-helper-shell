@@ -7,6 +7,7 @@ import requests
 from bs4 import BeautifulSoup
 
 import config
+import outputs
 
 
 def get_soup(url):
@@ -18,7 +19,7 @@ def get_soup(url):
 
 def download_file(url, filepath, replace=False):
     if os.path.exists(filepath) and not replace:
-        print('File already downloaded, skipping.')
+        outputs.warning_info('File already downloaded, skipping.')
         return
     part_file = f'{filepath}.part'
 
@@ -29,7 +30,7 @@ def download_file(url, filepath, replace=False):
     curl_header = [f'{k}: {v}' for k, v in config.down_headers.items()]
 
     if os.path.exists(part_file) and not replace:
-        print('Previously Downloaded part found.')
+        outputs.normal_info('Previously Downloaded part found.')
         wmode = 'ab'
         curl_header.append(
             config.resume_t.substitute(size=os.path.getsize(part_file)))
@@ -43,14 +44,15 @@ def download_file(url, filepath, replace=False):
             c.close()
     except (KeyboardInterrupt, pycurl.error) as e:
         c.close()
-        raise SystemExit(f"Download Failed {e}")
+        outputs.error_info(f"Download Failed {e}")
+        raise SystemExit
 
     os.rename(part_file, filepath)
 
 
 def download_m3u8(url, filepath, replace=False):
     if os.path.exists(filepath) and not replace:
-        print('File already downloaded, skipping.')
+        outputs.warning_info('File already downloaded, skipping.')
         return
     part_file = f'{filepath}.part'
     media = m3u8.load(url)
@@ -65,14 +67,14 @@ def download_m3u8(url, filepath, replace=False):
                 uri = f.absolute_uri
                 c.setopt(pycurl.URL, uri)
                 c.perform()
-                print('\rDownloaded :',
-                      f'{(i+1)*100//total}% ({i+1} of {total})',
-                      end="")
+                outputs.normal_info('\rDownloaded :',
+                                    f'{(i+1)*100//total}% ({i+1} of {total})',
+                                    end="")
             c.close()
         except (KeyboardInterrupt, pycurl.error) as e:
             c.close()
             raise SystemExit(f"Download Failed {e}")
-    print()
+    outputs.normal_info()
     os.rename(part_file, filepath)
 
 
@@ -141,7 +143,7 @@ def write_log(anime_name, episodes, append=True, logfile=config.logfile):
 
 
 def update_tracklist(anime_name, episodes, append=True):
-    log = readl_log(logfile=config.ongoingfile)
+    log = read_log(logfile=config.ongoingfile)
     if anime_name in log:
         write_log(anime_name,
                   episodes,
@@ -185,11 +187,12 @@ def extract_range(range_str):
             if '-' in r:
                 rng = r.split('-')
                 if len(rng) > 2:
-                    print(f'Incorrect formatting: {r}')
+                    outputs.prompt_val('Incorrect formatting', r, 'error')
                     raise SystemExit
                 yield from range(int(rng[0]), int(rng[1]) + 1)
             else:
                 yield int(r)
     except ValueError as e:
-        print(f'Incorrect formatting: use integers for episodes: \n{e}')
+        outputs.error_info(f'Incorrect formatting: use integers for episodes')
+        outputs.error_tag(e)
         raise SystemExit

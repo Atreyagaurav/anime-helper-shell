@@ -6,6 +6,7 @@ import requests
 
 import config
 import utils
+import outputs
 
 
 def get_anime_url(anime_name):
@@ -32,7 +33,11 @@ def get_direct_video_url(gogo_url):
     php_l = soup.find('iframe')['src']
     ajx_l = config.ajax_t.substitute(q=php_l.split('?')[1])
     r = requests.get(ajx_l)
-    link = json.loads(r.text)['source_bk'][0]['file']
+    try:
+        link = json.loads(r.text)['source_bk'][0]['file']
+    except (IndexError, KeyError):
+        outputs.error_info('Unexpected error while obtaining stream url')
+        raise SystemExit
     ftype = link.split('.')[-1]
     return link, ftype
 
@@ -61,23 +66,23 @@ def parse_gogo_url(url):
         anime_name = match.group(1)
         episode = match.group(2)
     else:
-        print("URL couldn't be parsed.")
+        outputs.error_info("URL couldn't be parsed.")
         raise SystemExit
     return anime_name, episode
 
 
-def verify_anime_exists(anime_name, verbose = False):
+def verify_anime_exists(anime_name, verbose=False):
     if utils.read_log(anime_name) is not None:
         if verbose:
-            print(f'LOG::{anime_name}')
+            outputs.normal_info(anime_name, 'LOG', reverse=True)
         return True
     elif anime_name in utils.read_cache(complete=True):
         if verbose:
-            print(f'CACHE::{anime_name}')
+            outputs.normal_info(anime_name, 'CACHE', reverse=True)
         return True
     elif utils.get_soup(get_anime_url(anime_name)) is not None:
         if verbose:
-            print(f'SITE::{anime_name}')
+            outputs.normal_info(anime_name, 'SITE', reverse=True)
         return True
     else:
         return False

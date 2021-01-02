@@ -11,6 +11,7 @@ import commands
 import gogoanime
 import utils
 import config
+import outputs
 
 
 class GGshell(cmd.Cmd):
@@ -23,14 +24,14 @@ class GGshell(cmd.Cmd):
 
     def onecmd(self, ind):
         if ind == 'EOF':
-            print()
+            outputs.normal_info()
             return
         try:
             return super().onecmd(ind)
         except (SystemExit, KeyboardInterrupt):
-            print()
+            outputs.normal_info()
         except (ConnectionError, ConnectTimeout):
-            print('Slow or no Internet connection. Try again.')
+            outputs.error_info('Slow or no Internet connection. Try again.')
 
     def cmdloop(self, intro=None):
         """Repeatedly issue a prompt, accept input, parse an initial prefix
@@ -73,7 +74,7 @@ class GGshell(cmd.Cmd):
                             else:
                                 line = line.rstrip('\r\n')
                     except KeyboardInterrupt:
-                        print('\n^C')
+                        self.stdout.write('\n^C\n')
                         continue
                 line = self.precmd(line)
                 stop = self.onecmd(line)
@@ -119,7 +120,7 @@ class GGshell(cmd.Cmd):
     def do_help(self, topic):
         if len(topic) == 0:
             import __init__
-            print(__init__.__doc__)
+            outputs.normal_info(__init__.__doc__)
         super().do_help(topic)
 
     # From here my commands start
@@ -136,7 +137,7 @@ class GGshell(cmd.Cmd):
             for j in range(1, readline.get_current_history_length() + 1):
                 h = readline.get_history_item(j)
                 if re.match(inp, h):
-                    print(f'{j:3d}:  {h}')
+                    outputs.normal_info(f'{j:3d}:  {h}')
         except ImportError:
             pass
 
