@@ -113,6 +113,8 @@ class GGshell(cmd.Cmd):
         pass
 
     def completedefault(self, text, line, start, end):
+        if re.match(r'([a-z-]+ +){2,}', line):
+            return []
         lists = set(utils.read_log().keys()).union(
             set(utils.read_cache(complete=True)))
         match = filter(lambda t: t.startswith(text), lists)
@@ -181,6 +183,8 @@ USAGE: untrack [ANIME-NAME]
         commands.untrack_anime(inp)
 
     def complete_untrack(self, text, line, start, end):
+        if re.match(r'([a-z-]+ +){2,}', line):
+            return []
         lists = utils.read_log(logfile=config.ongoingfile).keys()
         match = filter(lambda t: t.startswith(text), lists)
         return list(match)
@@ -242,8 +246,7 @@ USAGE: streamurl [GOGOANIME-URL]
         match = filter(lambda t: t.startswith(text), urls)
         return list(match)
 
-    def complete_streamurl(self, *args):
-        return self.complete_url(*args)
+    complete_streamurl = complete_url
 
     def do_download(self, inp):
         """Download the anime episodes in given range

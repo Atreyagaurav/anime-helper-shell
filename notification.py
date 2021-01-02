@@ -1,11 +1,16 @@
-import notify2
 import utils
+import outputs
+try:
+    import notify2
 
+    def send_notification(summary, body):
+        notify2.init('Gogoanime CLI')
+        n = notify2.Notification(summary, message=body)
+        n.show()
+except ImportError:
 
-def send_notification(summary, body):
-    notify2.init('Gogoanime CLI')
-    n = notify2.Notification(summary, message=body)
-    n.show()
+    def send_notification(summary, body):
+        outputs.error_info('Notification system is not setup properly')
 
 
 def episodes_update(updates):
