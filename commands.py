@@ -49,7 +49,7 @@ def set_geometry(value):
 
 
 def anime_log(args):
-    outputs.bold_info('Watched\tAnime Name')
+    outputs.bold_info('Watched\t\tAnime Name')
     log_args = dict()
     if len(args) == 0:
         pass

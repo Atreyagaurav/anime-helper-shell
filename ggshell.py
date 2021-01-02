@@ -16,7 +16,8 @@ import outputs
 
 class GGshell(cmd.Cmd):
     # These are overriden from cmd.Cmd
-    prompt = "gogoanime >>"
+    # ANSII scapes for orage bg
+    prompt = "\x1b[43mgogoanime\x1b[0m >>"
     # to have '-' character in my commands
     identchars = cmd.Cmd.identchars + '-'
     ruler = '-'

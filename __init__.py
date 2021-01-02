@@ -33,6 +33,8 @@ info     - Get the information about the anime.
 log      - print the log. Regex for filtering the log can be given as an
           argument.
 watched  - Add the episodes as watched in log, if you watched them elsewhere.
+track    - Put the anime on track list .
+updates  - See if any anime on the track list have updates on new episodes.
 
 Example Usage:
     check one-piece 1-10
