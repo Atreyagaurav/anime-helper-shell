@@ -4,12 +4,14 @@ Since I was tired of searching for different websites and different animes to wa
 
 I created this solution. It's not super useful, or the best, but it works fine for me.
 
+NOTE: it may stop working all of a sudden one day if the site goes down, so I can't guarantee till when it'll work.
+
 * Usages
 - Watch anime from online stream
 - Download anime for offline watch
 - Search anime from keywords
 - Record list of watched anime
-
+- Keep track of ongoing anime
 
 * Installation
 Clone this repository. 
@@ -44,3 +46,4 @@ You can symlink your anime storage directory to home too.
 - Quality selection
 - Color outputs; and managed outputs in stdout. (working on it)
 - Import watched logs from myanimelist.(dropped)
+- Choose the source for the video

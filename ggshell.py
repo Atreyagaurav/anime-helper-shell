@@ -180,6 +180,11 @@ USAGE: untrack [ANIME-NAME]
         """
         commands.untrack_anime(inp)
 
+    def complete_untrack(self, text, line, start, end):
+        lists = utils.read_log(logfile=config.ongoingfile).keys()
+        match = filter(lambda t: t.startswith(text), lists)
+        return list(match)
+
     def do_track(self, inp):
         """Put the given anime into the active track list.
 
@@ -203,6 +208,18 @@ USAGE: updates [ANIME-NAME]
         ANIME-NAME     : Name of the anime
         """
         commands.get_updates(inp.strip())
+
+    complete_updates = complete_untrack
+
+    def do_notify(self, inp):
+        """Get the updates for new episode releases in notification.
+
+USAGE: notify [ANIME-NAME]
+        ANIME-NAME     : Name of the anime
+        """
+        commands.notify_update(inp.strip())
+
+    complete_notify = complete_untrack
 
     def do_url(self, inp):
         """Downloads the anime episode from given gogoanime url

@@ -11,6 +11,7 @@ import config
 import gogoanime
 import utils
 import outputs
+import notification
 
 
 def set_quality(quality):
@@ -276,11 +277,12 @@ def stream_from_url(url, anime_name=None, episode=None):
 
 def track_anime(args):
     """Put an anime into the track list"""
-    anime_name, episodes = read_args(args)
+    anime_name = read_args(args, episodes=False)
     watched_episodes = utils.read_log(anime_name)
     if watched_episodes is None:
         outputs.warning_info(
             'Log entry not found. Setting only new episodes for tracking.')
+        _, episodes = read_args(args)
         episodes = utils.compress_range(episodes)
     else:
         outputs.prompt_val(f'Watched', watched_episodes, 'success')
@@ -309,7 +311,7 @@ def list_tracked():
         outputs.normal_info(f'{anime} : {episodes}')
 
 
-def get_updates(anime_name=''):
+def anime_updates(anime_name=''):
     """Check and display the updates on the tracked anime list."""
     if anime_name == '':
         anime_list = utils.read_log(logfile=config.ongoingfile)
@@ -326,6 +328,12 @@ def get_updates(anime_name=''):
             set(utils.extract_range(episodes)))
         if len(new) > 0:
             updates[anime] = new
+    return updates
+
+
+def get_updates(anime_name=''):
+    """Check and display the updates on the tracked anime list."""
+    updates = anime_updates(anime_name)
     if len(updates) == 0:
         outputs.normal_info("No new episodes released.")
         return
@@ -341,3 +349,8 @@ def get_updates(anime_name=''):
         outputs.success_tag(len(episodes), end=' ')
         outputs.prompt_val('new episodes', utils.compress_range(episodes),
                            'success')
+
+
+def notify_update(anime_name=''):
+    updates = anime_updates(anime_name)
+    notification.episodes_update(updates)

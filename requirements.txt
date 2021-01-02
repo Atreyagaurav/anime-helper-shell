@@ -3,3 +3,5 @@ m3u8
 requests
 beautifulsoup4
 html2text
+notify2
+colorama

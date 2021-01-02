@@ -35,6 +35,7 @@ log      - print the log. Regex for filtering the log can be given as an
 watched  - Add the episodes as watched in log, if you watched them elsewhere.
 track    - Put the anime on track list .
 updates  - See if any anime on the track list have updates on new episodes.
+notify   - Get the updates in notification, good for scheduled check.
 
 Example Usage:
     check one-piece 1-10
