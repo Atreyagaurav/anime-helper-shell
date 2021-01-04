@@ -164,6 +164,9 @@ class GGshell(cmd.Cmd):
         """
         commands.set_geometry(inp)
 
+    def complete_geometry(self, *ignored):
+        return [config.geometry]
+
     def do_fullscreen(self, inp):
         """Toggles the fullscreen setting for external player.
         """

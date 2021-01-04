@@ -124,12 +124,13 @@ def check_anime(args):
                            utils.compress_range(unavail_eps), 'warning')
 
 
-def read_args(args, episodes=True):
+def read_args(args, episodes=True, verbose=True):
     if len(args) == 0:
         name = utils.read_cache()
     elif args[0].isnumeric():
         name = utils.read_cache(int(args[0]))
-        outputs.prompt_val('Name', name)
+        if verbose:
+            outputs.prompt_val('Name', name)
     elif '/' in args[0]:
         name = args[0].strip('/').split('/')[-1]
     else:
@@ -146,10 +147,12 @@ def read_args(args, episodes=True):
     if not episodes:
         return name
     if len(args) <= 1:
-        outputs.warning_info('Episodes range not given defaulting to all')
+        if verbose:
+            outputs.warning_info('Episodes range not given defaulting to all')
         available_rng = gogoanime.get_episodes_range(
             gogoanime.get_anime_url(name))
-        outputs.prompt_val('Available episodes', available_rng)
+        if verbose:
+            outputs.prompt_val('Available episodes', available_rng)
         episodes = utils.extract_range(available_rng)
     elif len(args) == 2:
         episodes = utils.extract_range(args[1])
@@ -161,15 +164,17 @@ def read_args(args, episodes=True):
 
 
 def list_episodes(args):
-    name, episodes = read_args(args)
-    if len(sys.argv) == 4:
+    name = read_args(args, episodes=False)
+    available_rng = gogoanime.get_episodes_range(
+            gogoanime.get_anime_url(name))
+    if len(args) == 2:
+        _, episodes = read_args(args)
         eps = set(episodes)
         avl_eps = set(
-            utils.extract_range(
-                gogoanime.get_episodes_range(gogoanime.get_anime_url(name))))
+            utils.extract_range(available_rng))
         res = eps.intersection(avl_eps)
-        result = utils.compress_range(res)
-        outputs.prompt_val(f'Available episodes', result)
+        available_rng = utils.compress_range(res)
+    outputs.prompt_val(f'Available episodes', available_rng)
     outputs.prompt_val(f'Watched episodes', utils.read_log(name), 'success')
     utils.write_cache(name)
 
@@ -199,6 +204,7 @@ def search_anime(args):
 
 
 def import_from_mal(username):
+    # TODO : use MAL username to import his completed and other lists.
     pass
 
 

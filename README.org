@@ -6,12 +6,54 @@ I created this solution. It's not super useful, or the best, but it works fine f
 
 NOTE: it may stop working all of a sudden one day if the site goes down, so I can't guarantee till when it'll work.
 
+* Declaimer
+I do not own the videos or the right to distribute the videos which can be accessed through this program. It is just a helper program created for personal purposes and is like a terminal api for gogoanime site to ease the access as well as add the functionality of recording the watched animes and updates.
+
+
 * Usages
+** Supported devices
+Till now it works on (tested only on these; can probably work on others too):
+
+Arch Linux; Windows 10 & Termux android app.
+
+But the notify command doesn't work on windows and termux because of issue with availability of dbus. 
+
+** Basic Usages
 - Watch anime from online stream
 - Download anime for offline watch
 - Search anime from keywords
-- Record list of watched anime
+- Automatic/manual record list of watched anime
+- Continue from where you left off (episode wise not time of the episode)
 - Keep track of ongoing anime
+
+- Other utilities:
+ * get notification on updates (notify command - UNIX only)
+ * use shell commands with ! (e.g. !clear)
+
+** Usage instructions
+Some examples are on [[*Screenshots][Screenshots]] section.
+
+Assuming you have symlinked the ~ggshell.py~ to ~/use/bin/gogoanime~. Look at [[*Installation][Installation]] for more detail on this.
+
+For interactive shell, run ~python ggshell.py~, or ~ggshell.py~ (if you made it executable), or ~gogoanime~ (if you symlinked to this name).
+
+After that you can enter the commands in the shell; type ~help~ on overall help, and ~help command~ for specific help on some command. The help is not that detailed for each command for now, but I have tried to write what the command does.
+
+To run shell commands like ~clear~ use ~shell command~ syntax or ~!command~ syntax, where the command is the shell command you want to execute. (not tested in windows).
+
+For single use pass the command & arguments as command line arguments:
+#+begin_src bash
+gogoanime play one-piece
+#+end_src
+** Interactive shell
+*** inputs
+The interactive shell is written in python and [[https://www.man7.org/linux/man-pages/man3/readline.3.html][readline]] is used to get the input, hence supports emacs like keybindings. like C-r for reverse search of commands, and others, look at readline manual for other info on this. ~!man readline~ on interactive shell or ~man readline~ on bash.
+
+*** Autocomplete
+Auto-Completion is supported but it used the log list and cache list (previous search result) for completion of most commands so at the beginning there won't be much. Try searching animes then using the <TAB> key to autocomplete. As you use more and enter the animes on logs the autocomplete becomes more usable.
+
+Autocomplete for commands like help/ fullscreen/ quality etc doesn't depend on those so are usable from the start. 
+
 
 * Installation
 Clone this repository. 
@@ -29,13 +71,6 @@ Be sure to edit the ~config.py~ to change the ~ext_media_command~ variable if yo
 By defaults it makes ~anime~ directory in your home and stores it there.
 You can symlink your anime storage directory to home too. 
 
-* Screenshots
-
-[[./screenshots/info.png]]
-
-[[./screenshots/search.png]]
-
-[[./screenshots/watch.png]]
 
 * Known Bugs
 - Sometimes the mpv can't stream the stream link obtained with 403: Forbidden error.
@@ -47,3 +82,43 @@ You can symlink your anime storage directory to home too.
 - Color outputs; and managed outputs in stdout. (working on it)
 - Import watched logs from myanimelist.(dropped)
 - Choose the source for the video
+* Screenshots
+
+Searching and getting info on anime:
+
+[[./screenshots/info.png]]
+
+getting info from search list.
+
+[[./screenshots/number.png]]
+
+
+Watching anime:
+
+[[./screenshots/watch.png]]
+
+Logs on watched anime/episodes:
+
+[[./screenshots/log.png]]
+
+
+Adjustments:
+Geometry and fullscreen for player. Quality for stream/download.
+
+[[./screenshots/others.png]]
+
+Tracking an anime, and getting updates:
+
+[[./screenshots/track.png]]
+
+Commands history:
+
+You can use UP arrow key to get old commands, or use Ctrl+r to do reverse search (not tested in windows).
+
+[[./screenshots/history.png]]
+
+help command:
+
+[[./screenshots/help1.png]]
+
+[[./screenshots/help2.png]]
