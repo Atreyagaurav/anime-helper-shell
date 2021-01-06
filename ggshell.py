@@ -12,7 +12,7 @@ import gogoanime
 import utils
 import config
 import outputs
-
+from debug_shell import DebugShell
 
 class GGshell(cmd.Cmd):
     # These are overriden from cmd.Cmd
@@ -131,6 +131,9 @@ class GGshell(cmd.Cmd):
     def do_exit(self, inp):
         """Exit this interactive shell."""
         return True
+
+    def do_debug(self, inp):
+        DebugShell(self).cmdloop()
 
     def do_history(self, inp):
         """show the history of the commands.
