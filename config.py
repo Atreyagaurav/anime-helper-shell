@@ -7,6 +7,7 @@ gogoanime_url = 'https://gogoanime.so'
 
 ajax_t = Template('https://gogo-stream.com/ajax.php?${q}')
 
+ask_before_open = False
 geometry = '300-0-20'
 fullscreen = True
 

@@ -253,10 +253,17 @@ def stream_from_url(url, anime_name=None, episode=None):
         durl = utils.get_m3u8_stream(durl)
     outputs.prompt_val(f'Stream link', durl, 'success')
     try:
-        for i in range(11):
-            outputs.normal_info(
-                f'\rOpening External Player in: {1-i/10:1.1f} sec.', end='')
-            time.sleep(0.1)
+        if config.ask_before_open:
+            choice = input("Open External Player? <Y/n>")
+            if choice == '' or choice.lower()=='y':
+                pass
+            else:
+                raise SystemExit
+        else:
+            for i in range(11):
+                outputs.normal_info(
+                    f'\rOpening External Player in: {1-i/10:1.1f} sec.', end='')
+                time.sleep(0.1)
     except KeyboardInterrupt:
         outputs.warning_info('\nInturrupted, Exiting...')
         raise SystemExit
