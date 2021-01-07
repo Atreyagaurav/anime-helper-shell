@@ -196,3 +196,15 @@ def extract_range(range_str):
         outputs.error_info(f'Incorrect formatting: use integers for episodes')
         outputs.error_tag(e)
         raise SystemExit
+
+
+def recursive_getattr(obj, attr=None):
+    if attr is None or '.' not in attr:
+        return dir(obj)
+    else:
+        attrs = attr.split('.', 1)
+        try:
+            return map(lambda s: f'{attrs[0]}.{s}',
+                       recursive_getattr(getattr(obj, attrs[0]), attrs[1]))
+        except AttributeError:
+            return []

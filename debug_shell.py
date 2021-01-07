@@ -13,6 +13,7 @@ import importlib
 import gogoanime
 import commands
 import config
+import outputs
 import utils
 import notification
 
@@ -21,13 +22,14 @@ shell_commands = {
     "commands": commands,
     "config": config,
     "utils": utils,
-    "notification": notification
+    "notification": notification,
+    "outputs": outputs,
 }
 
 
 class DebugShell(cmd.Cmd):
-    identchars = cmd.IDENTCHARS + '.'
-    prompt = "\x1b[41mDEBUG\x1b[0m $"
+    identchars = cmd.IDENTCHARS + '.-'
+    prompt = "\x1b[44mDEBUG $\x1b[0m"
 
     def __init__(self, ggshell, *args, **kwargs):
         super(DebugShell, self).__init__(*args, **kwargs)
@@ -64,16 +66,22 @@ but import os.path as path works.
                 importlib.import_module(m.group(1)), m.group(2))
 
     def default(self, inp):
-        if 'import' in inp:
-            return self.import_mod(inp)
         try:
-            print(eval(inp, {}, shell_commands))
+            if 'import' in inp:
+                return self.import_mod(inp)
+            if '=' in inp:
+                exec(inp, {}, shell_commands)
+            else:
+                retval = eval(inp, {}, shell_commands)
+                outputs.success_tag('RET:', end=' ')
+                outputs.normal_info(retval)
         except Exception as e:
-            print(e)
+            outputs.error_tag('ERR:', end=' ')
+            outputs.normal_info(e)
+            traceback.print_exc(chain=False)
 
     def completedefault(self, text, line, *args):
-        # TODO : it's very incomplete, it's just a prototype
-        if len(line)>0 and line[0]=='!':
+        if len(line) > 0 and line[0] == '!':
             if ' ' in line:
                 lls = line.split(' ', 2)
                 try:
@@ -86,7 +94,8 @@ but import os.path as path works.
         if '.' in text:
             texts = text.split('.', 1)
             if texts[0] in shell_commands:
-                possible = dir(shell_commands[texts[0]])
+                possible = utils.recursive_getattr(shell_commands[texts[0]],
+                                                   texts[1])
                 match = filter(lambda a: a.startswith(texts[1]), possible)
                 completion = map(lambda m: f'{texts[0]}.{m}', match)
                 return list(completion)
@@ -94,7 +103,7 @@ but import os.path as path works.
                 return []
 
         commands = filter(lambda a: 'Error' not in a and not a.startswith('_'),
-                          dir(__builtins__))
+                          __builtins__)
         possible = itertools.chain(shell_commands, commands)
         match = filter(lambda a: a.startswith(text), possible)
         return list(match)
@@ -103,6 +112,3 @@ but import os.path as path works.
 
     def do_exit(self, inp):
         return True
-
-    def do_traceback(self, inp):
-        print(traceback.print_exc())

@@ -1,6 +1,10 @@
 """Command Line Interface for anime available in gogoanime website.
 
-Usage: COMMAND [ANIME-NAME] [RANGE]
+Usage:
+ - One time usage:
+ggshell.py COMMAND [ANIME-NAME] [RANGE]
+ - Shell usage:
+COMMAND [ANIME-NAME] [RANGE]
 
 Launching with no arguments will launch an interactive interface.
 
@@ -20,6 +24,7 @@ RANGE      - Range of the episodes; defaults to all episodes if not
 
 AVAILABLE COMMANDS:
 help     - Display this message.
+debug    - Launch the debug shell.
 url      - Download the video from provided URL.
 download - Download specified anime(episodes).
 check    - Check if specified anime(episodes) has missing episodes files.

@@ -54,6 +54,12 @@ Auto-Completion is supported but it used the log list and cache list (previous s
 
 Autocomplete for commands like help/ fullscreen/ quality etc doesn't depend on those so are usable from the start. 
 
+** Debug Shell for developers
+If you are familiar with python, now only can you edit the code, you can also use the debug shell to test the code, the history won't be updated on this shell. You can use it just like python REPL but has the necessary modules preloaded for debugging purposes. 
+
+You can use the ~shell~ command or ~!~ at the beginning to run that command in ggshell but unlike there you can look at the error and analyze the problem here.
+
+This is still a prototype so it isn't very good. 
 
 * Installation
 Clone this repository. 
@@ -75,7 +81,7 @@ You can symlink your anime storage directory to home too.
 * Known Bugs
 - Sometimes the mpv can't stream the stream link obtained with 403: Forbidden error.
 - The quality selection doesn't work unless the upstream provides m3u8 file.
-
+- Debug shell is a prototype and has glitches.
 * Future plans
 - Play locally downloaded episodes if present.
 - Quality selection

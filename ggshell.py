@@ -14,14 +14,19 @@ import config
 import outputs
 from debug_shell import DebugShell
 
+
 class GGshell(cmd.Cmd):
     # These are overriden from cmd.Cmd
     # ANSII scapes for orage bg
-    prompt = "\x1b[43mgogoanime\x1b[0m >>"
+    prompt = "\x1b[43mgogoanime >>\x1b[0m"
     # to have '-' character in my commands
     identchars = cmd.Cmd.identchars + '-'
     ruler = '-'
     misc_header = 'Other Help Topics'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.in_cmdloop = False
 
     def onecmd(self, ind):
         if ind == 'EOF':
@@ -41,6 +46,7 @@ class GGshell(cmd.Cmd):
 
         """
 
+        self.in_cmdloop = True
         self.preloop()
         if self.use_rawinput and self.completekey:
             try:
@@ -88,10 +94,12 @@ class GGshell(cmd.Cmd):
                     readline.set_completer(self.old_completer)
                 except ImportError:
                     pass
+        self.in_cmdloop = False
 
     def preloop(self):
         try:
             import readline
+            readline.clear_history()
             if os.path.exists(config.historyfile):
                 readline.read_history_file(config.historyfile)
             self.old_completers = readline.get_completer_delims()
@@ -133,11 +141,32 @@ class GGshell(cmd.Cmd):
         return True
 
     def do_debug(self, inp):
-        DebugShell(self).cmdloop()
+        """Launch the debug shell.
+
+You can tweak the config variables and other functions without having
+to edit the config.py and reloading the app and so on. Use this to see
+the effect of configurations which won't be saved.
+
+        """
+        if self.in_cmdloop:
+            self.postloop()
+            DebugShell(self).cmdloop(
+                "Debug Shell for gogoanime shell.\n" +\
+                "try `dir()` to see available context variables. " +\
+                "This shell is same as python shell but has gogoanime context.")
+            self.preloop()
+        else:
+            DebugShell(self).cmdloop()
 
     def do_history(self, inp):
         """show the history of the commands.
         """
+        if not self.in_cmdloop:
+            for j, h in enumerate(open(config.historyfile), start=1):
+                h = h.strip()
+                if re.match(inp, h):
+                    outputs.normal_info(f'{j:3d}:  {h}')
+            return
         try:
             import readline
             for j in range(1, readline.get_current_history_length() + 1):
