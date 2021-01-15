@@ -3,7 +3,6 @@ import os
 import re
 import sys
 
-import subprocess
 import time
 import html2text
 
@@ -165,13 +164,11 @@ def read_args(args, episodes=True, verbose=True):
 
 def list_episodes(args):
     name = read_args(args, episodes=False)
-    available_rng = gogoanime.get_episodes_range(
-            gogoanime.get_anime_url(name))
+    available_rng = gogoanime.get_episodes_range(gogoanime.get_anime_url(name))
     if len(args) == 2:
         _, episodes = read_args(args)
         eps = set(episodes)
-        avl_eps = set(
-            utils.extract_range(available_rng))
+        avl_eps = set(utils.extract_range(available_rng))
         res = eps.intersection(avl_eps)
         available_rng = utils.compress_range(res)
     outputs.prompt_val(f'Available episodes', available_rng)
@@ -201,6 +198,21 @@ def search_anime(args):
                                                   page=list_item.a.text)
             soup = utils.get_soup(url)
             search_results(soup)
+
+
+def latest():
+    tracklist = utils.read_log(logfile=config.ongoingfile)
+    utils.clear_cache()
+    for name, ep in gogoanime.home_page():
+        outputs.normal_info(f'{name} : ep-{ep}', end=' ')
+        utils.write_cache(name, append=True)
+        if name in tracklist:
+            watched = utils.extract_range(tracklist[name])
+            if int(ep) in watched:
+                outputs.warning_tag('WATCHED', end='')
+            else:
+                outputs.success_tag('NEW', end='')
+        outputs.normal_info()
 
 
 def import_from_mal(username):
@@ -255,37 +267,28 @@ def stream_from_url(url, anime_name=None, episode=None):
     try:
         if config.ask_before_open:
             choice = input("Open External Player? <Y/n>")
-            if choice == '' or choice.lower()=='y':
+            if choice == '' or choice.lower() == 'y':
                 pass
             else:
                 raise SystemExit
         else:
             for i in range(11):
                 outputs.normal_info(
-                    f'\rOpening External Player in: {1-i/10:1.1f} sec.', end='')
+                    f'\rOpening External Player in: {1-i/10:1.1f} sec.',
+                    end='')
                 time.sleep(0.1)
+            outputs.normal_info()
+        retval = utils.play_media(
+            durl, title=f'ANIME:{anime_name}:ep-{episode}.{ext}')
+        if retval:
+            utils.write_log(anime_name, episode)
+            utils.update_tracklist(anime_name, episode)
+            utils.write_cache(anime_name)
+            return
     except KeyboardInterrupt:
         outputs.warning_info('\nInturrupted, Exiting...')
         raise SystemExit
     outputs.normal_info()
-    while True:
-        t1 = time.time()
-        ret_val = subprocess.call(" ".join(config.ext_player_command + [durl]),
-                                  shell=True)
-        if ret_val == 2:  # mpv error code
-            outputs.error_info('Couldn\'t open the stream.')
-            if input("retry?<Y/n>") == '':
-                continue
-            else:
-                raise SystemExit
-        if (time.time() - t1) > (
-                5 * 60
-        ):  # 5 minutes watchtime at least, otherwise consider it unwatched.
-            # TODO: use direct communication with mpv to know if episode was watched.
-            utils.write_log(anime_name, episode)
-            utils.update_tracklist(anime_name, episode)
-            utils.write_cache(anime_name)
-        return
 
 
 def track_anime(args):

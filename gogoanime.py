@@ -59,6 +59,16 @@ def get_episodes_range(anime_url):
     return parsed_rng
 
 
+def home_page():
+    soup = utils.get_soup(config.gogoanime_url)
+    div = soup.find('div', {'class': 'last_episodes'})
+    eps = []
+    for li in div.find_all('li'):
+        link = li.find('a')['href']
+        eps.append(parse_gogo_url(link))
+    return eps
+
+
 def parse_gogo_url(url):
     whole_name = url.split('/')[-1]
     match = re.match(r'(.+)-episode-([0-9]+)', whole_name)

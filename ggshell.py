@@ -240,6 +240,13 @@ USAGE: tracklist
         """
         commands.list_tracked()
 
+    def do_latest(self, inp):
+        """Get the latest updates from the home page.
+
+USAGE: latest 
+        """
+        commands.latest()
+
     def do_updates(self, inp):
         """Get the updates for new episode releases.
 

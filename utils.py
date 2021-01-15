@@ -4,6 +4,8 @@ import math
 import pycurl
 import m3u8
 import requests
+import time
+import subprocess
 from bs4 import BeautifulSoup
 
 import config
@@ -208,3 +210,28 @@ def recursive_getattr(obj, attr=None):
                        recursive_getattr(getattr(obj, attrs[0]), attrs[1]))
         except AttributeError:
             return []
+
+
+def get_ext_player_command(path, title=None):
+    com = " ".join(config.ext_player_command)
+    if title:
+        com += f' --force-media-title={title}'
+    com += f' {path}'
+    return com
+
+
+def play_media(link, title=None):
+    while True:
+        t1 = time.time()
+        ret_val = subprocess.call(get_ext_player_command(link, title),
+                                  shell=True)
+        if ret_val == 2:  # mpv error code
+            outputs.error_info('Couldn\'t open the stream.')
+            if input("retry?<Y/n>") == '':
+                continue
+            else:
+                raise SystemExit
+        return (time.time() - t1) > (
+            5 * 60
+        )  # 5 minutes watchtime at least, otherwise consider it unwatched.
+        # TODO: use direct communication with mpv to know if episode was watched.
