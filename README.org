@@ -90,6 +90,12 @@ You can symlink your anime storage directory to home too.
 - Choose the source for the video
 * Screenshots
 
+Latest episode updates from home page:
+
+~NEW~ and ~WATCHED~ tags are shown for animes on the tracklist.
+
+[[./screenshots/recent.png]]
+
 Searching and getting info on anime:
 
 [[./screenshots/info.png]]
