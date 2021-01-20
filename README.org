@@ -79,13 +79,12 @@ You can symlink your anime storage directory to home too.
 
 
 * Known Bugs
+- Sometimes the input has residue texts from long command lines.
 - Sometimes the mpv can't stream the stream link obtained with 403: Forbidden error.
 - The quality selection doesn't work unless the upstream provides m3u8 file.
 - Debug shell is a prototype and has glitches.
 * Future plans
-- Play locally downloaded episodes if present.
 - Quality selection
-- Color outputs; and managed outputs in stdout. (working on it)
 - Import watched logs from myanimelist.(dropped)
 - Choose the source for the video
 * Screenshots
