@@ -11,7 +11,8 @@ ask_before_open = False
 geometry = '300-0-20'
 fullscreen = True
 
-ext_player_command = ''
+ext_player_command = ''         # Should be set from
+                                # compile_ext_player_command function
 
 def compile_ext_player_command():
     global ext_player_command

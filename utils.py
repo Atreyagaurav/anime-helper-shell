@@ -57,6 +57,9 @@ def download_m3u8(url, filepath, replace=False):
         outputs.warning_info('File already downloaded, skipping.')
         return
     part_file = f'{filepath}.part'
+    if os.path.exists(part_file) and not replace:
+         outputs.normal_info('Previously Downloaded part found.')
+         # TODO: resume download
     media = m3u8.load(url)
     total = len(media.segments)
     with open(part_file, 'wb') as writer:
@@ -70,6 +73,7 @@ def download_m3u8(url, filepath, replace=False):
                 c.setopt(pycurl.URL, uri)
                 c.perform()
                 outputs.normal_info('\rDownloaded :',
+                                    '#'*(((i+1)*40)//total),
                                     f'{(i+1)*100//total}% ({i+1} of {total})',
                                     end="")
             c.close()
@@ -182,10 +186,12 @@ def compress_range(range_list):
 
 def extract_range(range_str):
     if range_str is None or range_str.strip() == '':
-        return iter()
+        return
     ranges = range_str.split(',')
     try:
         for r in ranges:
+            if r.strip() == '':
+                continue
             if '-' in r:
                 rng = r.split('-')
                 if len(rng) > 2:
@@ -210,6 +216,51 @@ def recursive_getattr(obj, attr=None):
                        recursive_getattr(getattr(obj, attrs[0]), attrs[1]))
         except AttributeError:
             return []
+
+
+def get_anime_path(anime_name, *, make=False, check=False):
+    """returns tuple (anime path, existed before)
+    """
+    anime_dir = os.path.join(config.anime_dir, anime_name)
+    if not os.path.isdir(anime_dir):
+        if make:
+            os.mkdir(anime_dir)
+            return anime_dir, False
+        elif check:
+            return None, False
+        else:
+            return anime_dir, False
+    return anime_dir, True
+
+
+def get_local_episodes(pattrn=r'^[0-9a-z-]+$'):
+    animes = dict()
+    for folder in os.listdir(config.anime_dir):
+        if not os.path.isdir(os.path.join(config.anime_dir,folder)) or \
+           not re.match(pattrn, folder):
+            continue
+        animes[folder] = ''
+        for f in os.listdir(os.path.join(config.anime_dir, folder)):
+            m = re.match(r'^ep([0-9]+)\.[a-z0-9]+$', f)
+            if m:
+                animes[folder] += f',{m.group(1)}'
+    return animes
+
+
+def get_episode_path(anime_name,
+                     episode,
+                     *,
+                     ext='.mp4',
+                     make=False,
+                     check=False):
+    anime_dir, existed = get_anime_path(anime_name, make=make, check=check)
+    if anime_dir is None:
+        return None
+    ep_path = os.path.join(anime_dir, f'ep{episode:02d}{ext}')
+    if check and not os.path.isfile(ep_path):
+        return None
+    return ep_path
+
 
 
 def get_ext_player_command(path, title=None):

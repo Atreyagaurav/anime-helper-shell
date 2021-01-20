@@ -317,6 +317,36 @@ USAGE: play [ANIME-NAME] [EPISODES-RANGE]
         """
         commands.play_anime(inp.split())
 
+    def do_listlocal(self, inp):
+        """List the animes available in local storage.
+
+USAGE: listlocal [KEYWORDS]
+        KEYWORDS     : Name of the anime, or regex to filter the log.
+        """
+        commands.list_local_episodes(inp.split())
+
+    def complete_listlocal(self, text, line, *ignored):
+        animes = utils.get_local_episodes()
+        match = filter(lambda t: t.startswith(text), animes.keys())
+        return list(match)
+
+    def do_local(self, inp):
+        """Play the given episodes of the given anime from local storage.
+
+USAGE: local [ANIME-NAME] [EPISODES-RANGE]
+        ANIME-NAME     : Name of the anime, or choice number; defaults to 0
+        EPISODES-RANGE : Range of the episodes, defaults to all
+        """
+        commands.play_local_anime(inp.split())
+
+    def complete_local(self, text, line, *ignored):
+        m = re.match(r'local ([0-9a-z-]+) ', line)
+        if m:
+            name = m.group(1)
+            eps = utils.get_local_episodes(name)[name]
+            return [utils.compress_range(utils.extract_range(eps))]
+        return self.complete_listlocal(text, line, *ignored)
+
     def do_watched(self, inp):
         """Update the log so that the given anime (& episodes) are deemed watched.
 

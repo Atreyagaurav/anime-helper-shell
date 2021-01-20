@@ -49,7 +49,6 @@ def set_geometry(value):
 
 
 def anime_log(args):
-    outputs.bold_info('Watched\t\tAnime Name')
     log_args = dict()
     if len(args) == 0:
         pass
@@ -59,8 +58,16 @@ def anime_log(args):
         log_args['pattern'] = re.compile(args[0])
         if len(args) == 2:
             log_args['number'] = int(args[1])
-    logs = utils.read_log(**log_args).items()
-    for k, v in logs:
+    logs = utils.read_log(**log_args)
+    if len(logs) == 0:
+        if len(args) == 0:
+            outputs.warning_info('No log entries found.')
+        else:
+            outputs.prompt_val(f'Log entries not found for arguments', args[0],
+                               'error')
+        return
+    outputs.bold_info('Watched\t\tAnime Name')
+    for k, v in logs.items():
         outputs.normal_info(f'{v}\t\t{k}')
 
 
@@ -69,6 +76,17 @@ def play_anime(args):
     for e in episodes:
         url = gogoanime.get_episode_url(name, e)
         stream_from_url(url, name, e)
+
+
+def play_local_anime(args):
+    name, episodes = read_args(args)
+    for e in episodes:
+        path = utils.get_episode_path(name, e, check=True)
+        if not path:
+            outputs.prompt_val(f'File not found locally', f'{name}:ep-{e}',
+                               'error')
+            continue
+        stream_from_url(path, name, e, local=True)
 
 
 def update_log(args):
@@ -176,6 +194,25 @@ def list_episodes(args):
     utils.write_cache(name)
 
 
+def list_local_episodes(args):
+    in_dict = utils.get_local_episodes(*args)
+    out_dict = dict()
+    for anime, eps in in_dict.items():
+        new_eps = utils.compress_range(utils.extract_range(eps))
+        if new_eps != '':
+            out_dict[anime] = new_eps
+    empties = set(in_dict).difference(set(out_dict))
+    if len(out_dict) == 0:
+        outputs.warning_info('No local entries found.')
+    else:
+        outputs.bold_info('Episodes\tAnime Name')
+        for k, v in out_dict.items():
+            outputs.normal_info(f'{v}\t\t{k}')
+    if len(empties) > 0:
+        outputs.warning_info('Directories without Episodes:')
+        outputs.warning_info(', '.join(empties))
+
+
 def search_anime(args):
     name = " ".join(args)
     url = config.search_t.substitute(name=name)
@@ -240,29 +277,27 @@ def download_from_url(gogo_url, anime_name=None, episode=None):
     if not durl:
         outputs.error_info('Url for the file not found')
         raise SystemExit
-    if ext == 'm3u8':
-        m3u8_url = utils.get_m3u8_stream(durl)
+    if ext == '.m3u8':
         utils.download_m3u8(
-            m3u8_url,
-            os.path.join(config.anime_dir,
-                         f'./{anime_name}/ep{episode:02d}.{ext}'))
+            durl, utils.get_episode_path(anime_name, episode, make=True))
     else:
         utils.download_file(
             durl,
-            os.path.join(config.anime_dir,
-                         f'./{anime_name}/ep{episode:02d}.{ext}'))
+            utils.get_episode_path(anime_name, episode, ext=ext, make=True))
 
 
-def stream_from_url(url, anime_name=None, episode=None):
+def stream_from_url(url, anime_name=None, episode=None, *, local=False):
     if not anime_name or not episode:
         anime_name, episode = gogoanime.parse_gogo_url(url)
-    outputs.normal_info('Getting Streaming Link:', url)
-    durl, ext = gogoanime.get_direct_video_url(url)
-    if not durl:
-        outputs.error_info('Url for the file not found')
-        raise SystemExit
-    if ext == 'm3u8':
-        durl = utils.get_m3u8_stream(durl)
+    if local:
+        durl = url
+        _, ext = os.path.splitext(durl)
+    else:
+        outputs.normal_info('Getting Streaming Link:', url)
+        durl, ext = gogoanime.get_direct_video_url(url)
+        if not durl:
+            outputs.error_info('Url for the file not found')
+            raise SystemExit
     outputs.prompt_val(f'Stream link', durl, 'success')
     try:
         if config.ask_before_open:
@@ -279,7 +314,7 @@ def stream_from_url(url, anime_name=None, episode=None):
                 time.sleep(0.1)
             outputs.normal_info()
         retval = utils.play_media(
-            durl, title=f'ANIME:{anime_name}:ep-{episode}.{ext}')
+            durl, title=f'ANIME:{anime_name}:ep-{episode}{ext}')
         if retval:
             utils.write_log(anime_name, episode)
             utils.update_tracklist(anime_name, episode)

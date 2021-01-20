@@ -1,3 +1,4 @@
+import os
 import json
 import re
 from urllib.parse import urljoin
@@ -38,8 +39,10 @@ def get_direct_video_url(gogo_url):
     except (IndexError, KeyError):
         outputs.error_info('Unexpected error while obtaining stream url')
         raise SystemExit
-    ftype = link.split('.')[-1]
-    return link, ftype
+    _, ext = os.path.splitext(link)
+    if ext == '.m3u8':
+        link = utils.get_m3u8_stream(link)
+    return link, ext
 
 
 def get_episodes_range(anime_url):
