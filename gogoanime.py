@@ -93,6 +93,10 @@ def verify_anime_exists(anime_name, verbose=False):
         if verbose:
             outputs.normal_info(anime_name, 'CACHE', reverse=True)
         return True
+    elif utils.get_anime_path(anime_name, check=True)[0]:
+        if verbose:
+            outputs.normal_info(anime_name, 'LOCAL', reverse=True)
+        return True
     elif utils.get_soup(get_anime_url(anime_name)) is not None:
         if verbose:
             outputs.normal_info(anime_name, 'SITE', reverse=True)
