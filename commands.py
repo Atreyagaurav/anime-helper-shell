@@ -59,6 +59,7 @@ def anime_log(args):
         if len(args) == 2:
             log_args['number'] = int(args[1])
     logs = utils.read_log(**log_args)
+    ongoing = utils.read_log(logfile=config.ongoingfile)
     if len(logs) == 0:
         if len(args) == 0:
             outputs.warning_info('No log entries found.')
@@ -68,7 +69,10 @@ def anime_log(args):
         return
     outputs.bold_info('Watched\t\tAnime Name')
     for k, v in logs.items():
-        outputs.normal_info(f'{v}\t\t{k}')
+        outputs.normal_info(f'{v}\t\t{k}', end=' ')
+        if k in ongoing:
+            outputs.warning_tag('TRACKED', end='')
+        outputs.normal_info()
 
 
 def play_anime(args):

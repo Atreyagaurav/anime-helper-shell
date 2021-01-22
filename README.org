@@ -77,6 +77,9 @@ Be sure to edit the ~config.py~ to change the ~ext_media_command~ variable if yo
 By defaults it makes ~anime~ directory in your home and stores it there.
 You can symlink your anime storage directory to home too. 
 
+** Mpv Plugin
+There is a cfiles folder with c codes for mpv plugin and status checking program, both can be compiled with ~make~ and installed with ~make install~.
+Just update the path macros on the C files and then compile with make (I don't know how to make that automatic with make right now - help will be appreciated.)
 
 * Known Bugs
 - Sometimes the input has residue texts from long command lines.
