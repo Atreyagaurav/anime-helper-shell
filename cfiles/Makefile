@@ -1,3 +1,5 @@
+# I'm just learning Makefiles so I don't know if I'm doing the things
+# as per standards/best practices. Suggestions will be appreciated.
 CC = gcc
 CFLAGS = -Wall
 LIBS = -lmpv

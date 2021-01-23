@@ -1,8 +1,3 @@
-// Build with: gcc -o plugin.so plugin.c `pkg-config --cflags mpv --libs libnotify` -shared -fPIC
-// Warning: do not link against libmpv.so! Read:
-//    https://mpv.io/manual/master/#linkage-to-libmpv
-// The pkg-config call is for adding the proper client.h include path.
-
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -82,7 +77,7 @@ void new_info_file(char *filename){
 
 
 void read_status(mpv_handle * handle){
-  /* if (st.fname != NULL) mpv_free(&(st.fname)); */
+  if (st.fname != NULL) mpv_free(st.fname);
   mpv_get_property(handle, "media-title", MPV_FORMAT_STRING, &(st.fname));
   mpv_get_property(handle, "time-pos", MPV_FORMAT_DOUBLE, &(st.cur));
   mpv_get_property(handle, "duration", MPV_FORMAT_DOUBLE, &(st.dur));
@@ -130,7 +125,7 @@ void init_plugin(mpv_handle *handle, char *filename, NotifyNotification **n){
     mkdir(INFO_DIR, 0700);
     new_info_file(filename);
     printf("Status Update file: %s\n", filename);
-    printf("Log file: %s\n", LOG_FILE);
+    if (!LOGGING_OFF) printf("Log file: %s\n", LOG_FILE);
     mpv_observe_property(handle, 0, "playback-time", MPV_FORMAT_DOUBLE);
     mpv_observe_property(handle, 0, "pause", MPV_FORMAT_FLAG);
     notify_init("MPV");
