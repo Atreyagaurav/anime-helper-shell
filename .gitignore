@@ -1,0 +1,10 @@
+# environments
+venv
+.venv
+.env
+
+# Compiled files
+__pycache__
+*.o
+*.so
+
