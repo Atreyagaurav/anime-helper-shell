@@ -48,10 +48,11 @@ void shorten_string(char *str, int len){
 
 void info_filename(int number, char *dest){
   strcpy(dest, INFO_DIR);
-  char count[5];
+  /* Max Pid for 64bit = 4194304 */
+  char count[8];
   int i;
-  count[4] = '\0';
-  for(i=3;i>=0;i--){
+  count[7] = '\0';
+  for(i=6;i>=0;i--){
     count[i] = number % 10 + '0';
     number /= 10;
   }
@@ -65,14 +66,18 @@ void info_filename(int number, char *dest){
 }
 
 void new_info_file(char *filename){
-  int i = 1;
-  while (1){
-    info_filename(i++, filename);
-    if (access(filename, F_OK) == 0){
-      continue;
-    }
-    return;
-  }
+  info_filename(getpid(), filename);
+  return;
+
+  /* This used to set filenames on increasing number. */
+  /* int i = 1; */
+  /* while (1){ */
+  /*   info_filename(i++, filename); */
+  /*   if (access(filename, F_OK) == 0){ */
+  /*     continue; */
+  /*   } */
+  /*   return; */
+  /* } */
 }
 
 

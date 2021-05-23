@@ -1,7 +1,9 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <signal.h>
 
 #define INFO_DIR "/tmp/mpvinfo/"
 #define MAX_COL 50
@@ -28,16 +30,23 @@ int main(int argc, char *argv[])
     printf("No MPV instances.\n");
     return 0;
   }
-  int count = 0, col;
+  int count = 0, col, pid;
   dir = opendir(INFO_DIR);
   while ((file = readdir(dir)) != NULL){
     if(file->d_name[0]=='.'){
       continue;
     }
-    count++;
     join_path(INFO_DIR, file->d_name, fullpath);
+
+    /* check if the instance is still running. */
+    pid = atoi(file->d_name);
+    if (kill(pid, 0)){
+      remove(fullpath);
+      continue;
+    }
+    count++;
     fp = fopen(fullpath, "r");
-    printf("(%d) ",count);
+    printf("(%d) ", pid);
     col=0;
     while ((c=getc(fp))!=EOF){
       col++;
