@@ -41,8 +41,8 @@ class GGshell(cmd.Cmd):
 
     def cmdloop(self, intro=None):
         """Repeatedly issue a prompt, accept input, parse an initial prefix
-        off the received input, and dispatch to action methods, passing them
-        the remainder of the line as argument.
+off the received input, and dispatch to action methods, passing them
+the remainder of the line as argument.
 
         """
 
@@ -126,7 +126,7 @@ class GGshell(cmd.Cmd):
         lists = set(utils.read_log().keys()).union(
             set(utils.read_cache(complete=True)))
         match = filter(lambda t: t.startswith(text), lists)
-        return list(match)
+        return utils.completion_list(match)
 
     def do_help(self, topic):
         if len(topic) == 0:
@@ -151,9 +151,10 @@ the effect of configurations which won't be saved.
         if self.in_cmdloop:
             self.postloop()
             DebugShell(self).cmdloop(
-                "Debug Shell for gogoanime shell.\n" +\
-                "try `dir()` to see available context variables. " +\
-                "This shell is same as python shell but has gogoanime context.")
+                "Debug Shell for gogoanime shell.\n" +
+                "try `dir()` to see available context variables. " +
+                "This shell is same as python shell but has" +
+                " gogoanime context.")
             self.preloop()
         else:
             DebugShell(self).cmdloop()
@@ -197,7 +198,7 @@ the effect of configurations which won't be saved.
         commands.set_geometry(inp)
 
     def complete_geometry(self, *ignored):
-        return [config.geometry]
+        return utils.completion_list([config.geometry])
 
     def do_fullscreen(self, inp):
         """Toggles the fullscreen setting for external player.
@@ -207,7 +208,7 @@ the effect of configurations which won't be saved.
     def complete_fullscreen(self, text, *ignored):
         possibilities = ['yes', 'no', 'on', 'off']
         match = filter(lambda t: t.startswith(text), possibilities)
-        return list(match)
+        return utils.completion_list(match)
 
     def do_untrack(self, inp):
         """Put the given anime into the active track list.
@@ -222,7 +223,7 @@ USAGE: untrack [ANIME-NAME]
             return []
         lists = utils.read_log(logfile=config.ongoingfile).keys()
         match = filter(lambda t: t.startswith(text), lists)
-        return list(match)
+        return utils.completion_list(match)
 
     def do_track(self, inp):
         """Put the given anime into the active track list.
@@ -243,7 +244,7 @@ USAGE: tracklist
     def do_latest(self, inp):
         """Get the latest updates from the home page.
 
-USAGE: latest 
+USAGE: latest
         """
         commands.latest()
 
@@ -286,7 +287,7 @@ USAGE: streamurl [GOGOANIME-URL]
             set(utils.read_cache(complete=True)))
         urls = map(lambda name: gogoanime.get_episode_url(name, ''), lists)
         match = filter(lambda t: t.startswith(text), urls)
-        return list(match)
+        return utils.completion_list(match)
 
     complete_streamurl = complete_url
 
@@ -317,6 +318,17 @@ USAGE: play [ANIME-NAME] [EPISODES-RANGE]
         """
         commands.play_anime(inp.split())
 
+    def complete_play(self, text, line, *ignored):
+        m = re.match(r'play +([0-9a-z-]+) +', line)
+        if m:
+            name = m.group(1)
+            log = utils.read_log(name)
+            if not log:
+                return ["1"]
+            ep = utils.Log(log).eps.split('-')[-1]
+            return [str(int(ep) + 1)]
+        return self.completedefault(text, line, *ignored)
+
     def do_listlocal(self, inp):
         """List the animes available in local storage.
 
@@ -325,10 +337,14 @@ USAGE: listlocal [KEYWORDS]
         """
         commands.list_local_episodes(inp.split())
 
+    do_locallist = do_listlocal
+
     def complete_listlocal(self, text, line, *ignored):
         animes = utils.get_local_episodes()
         match = filter(lambda t: t.startswith(text), animes.keys())
-        return list(match)
+        return utils.completion_list(match)
+
+    complete_locallist = complete_listlocal
 
     def do_local(self, inp):
         """Play the given episodes of the given anime from local storage.
@@ -337,10 +353,13 @@ USAGE: local [ANIME-NAME] [EPISODES-RANGE]
         ANIME-NAME     : Name of the anime, or choice number; defaults to 0
         EPISODES-RANGE : Range of the episodes, defaults to all
         """
+        if inp.strip() == '':
+            self.do_listlocal(inp)
+            return
         commands.play_local_anime(inp.split())
 
     def complete_local(self, text, line, *ignored):
-        m = re.match(r'local ([0-9a-z-]+) ', line)
+        m = re.match(r'local +([0-9a-z-]+) +', line)
         if m:
             name = m.group(1)
             eps = utils.get_local_episodes(name)[name]
@@ -348,7 +367,8 @@ USAGE: local [ANIME-NAME] [EPISODES-RANGE]
         return self.complete_listlocal(text, line, *ignored)
 
     def do_watched(self, inp):
-        """Update the log so that the given anime (& episodes) are deemed watched.
+        """Update the log so that the given anime (& episodes) are deemed
+watched.
 
 USAGE: watched [ANIME-NAME] [EPISODES-RANGE]
         ANIME-NAME     : Name of the anime, or choice number; defaults to 0
@@ -357,7 +377,8 @@ USAGE: watched [ANIME-NAME] [EPISODES-RANGE]
         commands.update_log(inp.split())
 
     def do_edit(self, inp):
-        """Edit the log so that the given anime (& episodes) replace the previous log information with new.
+        """Edit the log so that the given anime (& episodes) replace the
+previous log information with new.
 
 USAGE: edit [ANIME-NAME] [EPISODES-RANGE]
         ANIME-NAME     : Name of the anime, or choice number; defaults to 0
@@ -410,6 +431,14 @@ Do not use this when simple commands like ls and tree are enough, as it
 also checks the file online to make sure extensions match.
         """
         commands.check_anime(inp.split())
+
+    # Aliases
+    do_la = do_latest
+    do_ls = do_locallist
+    # do_co = do_continue
+    do_s = do_search
+    # do_pl = do_play
+    do_q = do_exit
 
 
 if __name__ == '__main__':

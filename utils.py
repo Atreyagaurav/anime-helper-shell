@@ -1,15 +1,71 @@
 import os
 import re
 import math
+import time
+import datetime as dt
+import subprocess
+
 import pycurl
 import m3u8
 import requests
-import time
-import subprocess
+
 from bs4 import BeautifulSoup
 
 import config
 import outputs
+
+
+class Log:
+    def __init__(self, logline, eps=None):
+        if not logline:
+            self.anime = ''
+            self.eps = ''
+            self.last_updated = None
+            return
+        data = logline.split()
+        self.anime = data[0]
+        if eps:
+            self.eps = eps
+            self.last_updated = dt.datetime.now()
+        else:
+            self.eps = data[1]
+            if len(data) > 2:
+                self.last_updated = dt.datetime.fromtimestamp(int(data[2]))
+            else:
+                self.last_updated = None
+
+    @property
+    def last_updated_fmt(self):
+        if self.last_updated:
+            return self.last_updated.strftime("%Y-%m-%d %H:%M %A")
+        return ''
+
+    def add(self, eps):
+        self.eps = compress_range(extract_range(f'{self.eps},{eps}'))
+
+        self.last_updated = dt.datetime.now()
+        return self
+
+    def edit(self, eps):
+        self.eps = eps
+        self.last_updated = dt.datetime.now()
+        return self
+
+    def __str__(self):
+        rep = f'{self.anime} {self.eps}'
+        if self.last_updated:
+            rep += f' {int(self.last_updated.timestamp())}'
+        return rep
+
+    def show(self):
+        if len(self.eps) > 10:
+            data = re.split(f',|-', self.eps)
+            eps = f'{data[0]}...{data[-1]}'
+        else:
+            eps = self.eps
+
+        rep = f'{eps}\t\t{self.anime} ({self.last_updated_fmt})'
+        return rep
 
 
 def get_soup(url):
@@ -58,8 +114,8 @@ def download_m3u8(url, filepath, replace=False):
         return
     part_file = f'{filepath}.part'
     if os.path.exists(part_file) and not replace:
-         outputs.normal_info('Previously Downloaded part found.')
-         # TODO: resume download
+        outputs.normal_info('Previously Downloaded part found.')
+        # TODO: resume download
     media = m3u8.load(url)
     total = len(media.segments)
     with open(part_file, 'wb') as writer:
@@ -73,7 +129,7 @@ def download_m3u8(url, filepath, replace=False):
                 c.setopt(pycurl.URL, uri)
                 c.perform()
                 outputs.normal_info('\rDownloaded :',
-                                    '#'*(((i+1)*40)//total),
+                                    '#' * (((i + 1) * 40) // total),
                                     f'{(i+1)*100//total}% ({i+1} of {total})',
                                     end="")
             c.close()
@@ -126,7 +182,7 @@ def read_log(anime_name=None,
         log = dict()
     else:
         log = {
-            line[0]: " ".join(line[1:])
+            line[0]: " ".join(line)
             for i, line in enumerate(li.strip().split()
                                      for li in open(logfile, 'r')
                                      if pattern.match(li.split()[0]))
@@ -140,12 +196,11 @@ def read_log(anime_name=None,
 def write_log(anime_name, episodes, append=True, logfile=config.logfile):
     log = read_log(logfile=logfile)
     if anime_name in log and append:
-        log[anime_name] = compress_range(
-            extract_range(f'{log[anime_name]},{episodes}'))
+        log[anime_name] = str(Log(log[anime_name]).add(episodes))
     else:
-        log[anime_name] = episodes
+        log[anime_name] = str(Log(anime_name, episodes))
     with open(logfile, 'w') as w:
-        w.writelines((f'{k} {v}\n' for k, v in log.items()))
+        w.writelines((f'{v}\n' for v in log.values()))
 
 
 def update_tracklist(anime_name, episodes, append=True):
@@ -201,7 +256,7 @@ def extract_range(range_str):
             else:
                 yield int(r)
     except ValueError as e:
-        outputs.error_info(f'Incorrect formatting: use integers for episodes')
+        outputs.error_info('Incorrect formatting: use integers for episodes')
         outputs.error_tag(e)
         raise SystemExit
 
@@ -236,7 +291,7 @@ def get_anime_path(anime_name, *, make=False, check=False):
 def get_local_episodes(pattrn=r'^[0-9a-z-]+$'):
     animes = dict()
     for folder in os.listdir(config.anime_dir):
-        if not os.path.isdir(os.path.join(config.anime_dir,folder)) or \
+        if not os.path.isdir(os.path.join(config.anime_dir, folder)) or \
            not re.match(pattrn, folder):
             continue
         animes[folder] = ''
@@ -262,7 +317,6 @@ def get_episode_path(anime_name,
     return ep_path
 
 
-
 def get_ext_player_command(path, title=None):
     com = " ".join(config.ext_player_command)
     if title:
@@ -282,7 +336,11 @@ def play_media(link, title=None):
                 continue
             else:
                 raise SystemExit
-        return (time.time() - t1) > (
-            5 * 60
-        )  # 5 minutes watchtime at least, otherwise consider it unwatched.
-        # TODO: use direct communication with mpv to know if episode was watched.
+        return (time.time() - t1) > (5 * 60)
+    # 5 minutes watchtime at least, otherwise consider it unwatched.
+    # TODO: use direct communication with mpv to know if episode was
+    # watched.
+
+
+def completion_list(iterator):
+    return [f'{s} ' for s in iterator]

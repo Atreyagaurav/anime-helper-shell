@@ -54,7 +54,7 @@ def get_episodes_range(anime_url):
     for r in rngs_obj:
         rng = r.text
         rngs = rng.split('-')
-        if rngs[0] == '0':
+        if rngs[0] == '0' and len(rngs) == 2:
             rngs[0] = '1'
         total_rng.append('-'.join(rngs))
     text = ','.join(total_rng)
@@ -67,8 +67,11 @@ def home_page():
     div = soup.find('div', {'class': 'last_episodes'})
     eps = []
     for li in div.find_all('li'):
-        link = li.find('a')['href']
-        eps.append(parse_gogo_url(link))
+        try:
+            link = li.find('a')['href']
+            eps.append(parse_gogo_url(link))
+        except SystemExit:
+            continue
     return eps
 
 

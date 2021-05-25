@@ -11,8 +11,10 @@ ask_before_open = False
 geometry = '300-0-20'
 fullscreen = True
 
-ext_player_command = ''         # Should be set from
-                                # compile_ext_player_command function
+ext_player_command = ''
+# Should be set from
+# compile_ext_player_command function
+
 
 def compile_ext_player_command():
     global ext_player_command
@@ -40,13 +42,13 @@ ongoingfile = os.path.join(anime_dir, ".ongoing")
 episode_t = Template("${anime}-episode-${ep}")
 anime_t = Template("category/${anime}")
 resume_t = Template("Range: bytes=${size}-")
-search_t = Template("https://gogoanime.so//search.html?keyword=${name}")
+search_t = Template(gogoanime_url + "//search.html?keyword=${name}")
 search_page_t = Template(
-    "https://gogoanime.so//search.html?keyword=${name}&page=${page}")
+    gogoanime_url + "//search.html?keyword=${name}&page=${page}")
 
 req_headers = {
     "User-Agent":
-    "Mozilla/5.0 (X11; Linux x86_64; rv:82.0) Gecko/20100102 Firefox/82.0",
+    "Mozilla/5.0 (X11; Linux x86_64; rv:84.0) Gecko/2010010 Firefox/84.0",
     "Accept":
     "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
     "Accept-Language": "en-US,en;q=0.5",
