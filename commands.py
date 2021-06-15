@@ -104,17 +104,24 @@ def edit_log(args):
 
 
 def continue_play(args):
-    name, episodes = read_args(args)
+    name = read_args(args, episodes=False)
     log = utils.Log(utils.read_log().get(name))
+    watch_later = utils.read_log(name, logfile=config.watchlaterfile)
+    if watch_later:
+        episodes = utils.extract_range(utils.Log(watch_later).eps)
+    else:
+        _, episodes = read_args(args)
     outputs.prompt_val("Watched", log.eps, "success", end='')
     outputs.normal_info(log.last_updated_fmt)
     if not log.eps:
         last = 0
     else:
-        last = int(log.eps.split("-")[-1])
-    play_anime(
-        [name,
-         utils.compress_range(filter(lambda e: e > last, episodes))])
+        last = int(re.split('-|,', log.eps)[-1])
+    to_play = utils.compress_range(filter(lambda e: e > last, episodes))
+    if to_play.strip():
+        play_anime([name, to_play])
+    else:
+        unsave_anime(name)
 
 
 def download_anime(args):
@@ -154,7 +161,7 @@ def read_args(args, episodes=True, verbose=True):
     elif "/" in args[0]:
         name = args[0].strip("/").split("/")[-1]
     else:
-        name = gogoanime.process_anime_name(args[0])
+        name = gogoanime.process_anime_name(args[0].strip('"'))
         if not gogoanime.verify_anime_exists(name):
             outputs.prompt_val("Anime with the name doesn't exist", args[0],
                                "error")
@@ -194,7 +201,7 @@ def list_episodes(args):
         available_rng = utils.compress_range(res)
     outputs.prompt_val("Available episodes", available_rng)
     log = utils.Log(utils.read_log(name))
-    outputs.prompt_val("Watched episodes", log.eps, "success", end='')
+    outputs.prompt_val("Watched episodes", log.eps, "success", end=' ')
     outputs.normal_info(log.last_updated_fmt)
     utils.write_cache(name)
 
@@ -324,11 +331,30 @@ def stream_from_url(url, anime_name=None, episode=None, *, local=False):
             utils.write_log(anime_name, episode)
             utils.update_tracklist(anime_name, episode)
             utils.write_cache(anime_name)
+            utils.update_watchlater(anime_name, episode)
             return
     except KeyboardInterrupt:
         outputs.warning_info("\nInturrupted, Exiting...")
         raise SystemExit
     outputs.normal_info()
+
+
+def save_anime(args):
+    """Put the anime into watch later list."""
+    anime_name, eps = read_args(args)
+    watched = utils.read_log(anime_name)
+    if watched:
+        watched_eps = utils.extract_range(utils.Log(watched).eps)
+    else:
+        watched_eps = []
+    save_eps = set(eps).difference(set(watched_eps))
+    if not save_eps:
+        outputs.warning_info('Already watched the provided episodes.')
+        return
+    utils.write_log(anime_name,
+                    utils.compress_range(save_eps),
+                    append=True,
+                    logfile=config.watchlaterfile)
 
 
 def track_anime(args):
@@ -351,18 +377,26 @@ def track_anime(args):
 
 def untrack_anime(anime_name):
     """Remove an anime from the track list"""
-    anime_list = utils.read_log(logfile=config.ongoingfile)
-    if anime_name in anime_list:
-        anime_list.pop(anime_name)
-    else:
-        return
-    with open(config.ongoingfile, "w") as w:
-        for log in anime_list.values():
-            w.write(f"{log}\n")
+    utils.remove_anime_from_log(anime_name, logfile=config.ongoingfile)
+
+
+def unsave_anime(anime_name):
+    """Remove an anime from the saved list"""
+    utils.remove_anime_from_log(anime_name, logfile=config.watchlaterfile)
+
+
+def unlog_anime(anime_name):
+    utils.remove_anime_from_log(anime_name)
 
 
 def list_tracked():
     anime_list = utils.read_log(logfile=config.ongoingfile)
+    for anime, log in anime_list.items():
+        outputs.normal_info(utils.Log(log).show())
+
+
+def list_saved_anime():
+    anime_list = utils.read_log(logfile=config.watchlaterfile)
     for anime, log in anime_list.items():
         outputs.normal_info(utils.Log(log).show())
 

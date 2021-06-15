@@ -210,8 +210,16 @@ the effect of configurations which won't be saved.
         match = filter(lambda t: t.startswith(text), possibilities)
         return utils.completion_list(match)
 
+    def do_unlog(self, inp):
+        """Remove the log entry for the given anime.
+
+USAGE: unlog [ANIME-NAME]
+        ANIME-NAME     : Name of the anime
+        """
+        commands.unlog_anime(inp)
+
     def do_untrack(self, inp):
-        """Put the given anime into the active track list.
+        """Remove the given anime from the active track list.
 
 USAGE: untrack [ANIME-NAME]
         ANIME-NAME     : Name of the anime
@@ -329,11 +337,29 @@ USAGE: play [ANIME-NAME] [EPISODES-RANGE]
             return [str(int(ep) + 1)]
         return self.completedefault(text, line, *ignored)
 
+    def do_savelist(self, inp):
+        """List the animes saved for watching later.
+
+USAGE: savelist
+        """
+        commands.list_saved_anime()
+
+    def do_unsave(self, inp):
+        """Play the given episodes of the given anime.
+
+USAGE: unsave [ANIME-NAME]
+        ANIME-NAME     : Name of the anime
+        """
+        commands.unsave_anime(inp.strip())
+
+    def complete_unsave(self, text, line, *ignored):
+        return utils.completion_list(filter(lambda x: re.match(text,x), utils.read_log(logfile=config.watchlaterfile).keys()))
+
     def do_listlocal(self, inp):
         """List the animes available in local storage.
 
 USAGE: listlocal [KEYWORDS]
-        KEYWORDS     : Name of the anime, or regex to filter the log.
+        KEYWORDS     : Name of the anime, or regex to filter the list.
         """
         commands.list_local_episodes(inp.split())
 
@@ -385,6 +411,15 @@ USAGE: edit [ANIME-NAME] [EPISODES-RANGE]
         EPISODES-RANGE : Range of the episodes, defaults to all
         """
         commands.edit_log(inp.split())
+
+    def do_save(self, inp):
+        """Save the anime or episodes to watch later list.
+
+USAGE: save [ANIME-NAME] [EPISODES-RANGE]
+        ANIME-NAME     : Name of the anime, or choice number; defaults to 0
+        EPISODES-RANGE : Range of the episodes, defaults to all
+        """
+        commands.save_anime(inp.split())
 
     def do_continue(self, inp):
         """Play the given anime's unwatched episodes from the start.

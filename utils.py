@@ -161,7 +161,12 @@ def read_cache(num=1, complete=False):
         if complete:
             return list(map(lambda l: l.strip(), lines))
         else:
-            return lines[num - 1].strip()
+            try:
+                return lines[num - 1].strip()
+            except IndexError:
+                outputs.error_info("The choice number is too large.")
+                outputs.prompt_val("Total items in cache", len(lines), 'error')
+                raise SystemExit
 
 
 def write_cache(anime, append=False):
@@ -203,13 +208,43 @@ def write_log(anime_name, episodes, append=True, logfile=config.logfile):
         w.writelines((f'{v}\n' for v in log.values()))
 
 
+def remove_anime_from_log(anime_name, logfile=config.logfile):
+    anime_list = read_log(logfile=logfile)
+    if anime_name in anime_list:
+        anime_list.pop(anime_name)
+    else:
+        return
+    logs = sorted(
+        map(Log, anime_list.values()),
+        key=lambda l: ((int(l.last_updated.timestamp()) if l.last_updated else 0) -  # - since it's reverse
+                  (ord(l.anime[0])-ord('a'))/26),
+        reverse=True)
+    with open(logfile, "w") as w:
+        for log in logs:
+            w.write(f"{str(log)}\n")
+
+
 def update_tracklist(anime_name, episodes, append=True):
-    log = read_log(logfile=config.ongoingfile)
-    if anime_name in log:
+    log = read_log(anime_name, logfile=config.ongoingfile)
+    if log:
         write_log(anime_name,
                   episodes,
                   append=append,
                   logfile=config.ongoingfile)
+
+def update_watchlater(anime_name, episode=None):
+    log = read_log(anime_name, logfile=config.watchlaterfile)
+    if log:
+        eps = set(extract_range(Log(log).eps)).difference(
+            set([episode])
+        )
+        if not eps:
+            remove_anime_from_log(anime_name, logfile=config.watchlaterfile)
+        else:
+            write_log(anime_name,
+                      compress_range(eps),
+                      append=True,
+                      logfile=config.watchlaterfile)
 
 
 def compress_range(range_list):

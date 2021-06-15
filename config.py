@@ -3,7 +3,7 @@ from string import Template
 
 QUALITY_PREFERENCE = 720
 
-gogoanime_url = 'https://gogoanime.so'
+gogoanime_url = 'https://gogoanime.ai'
 
 ajax_t = Template('https://gogo-stream.com/ajax.php?${q}')
 
@@ -27,17 +27,18 @@ def compile_ext_player_command():
     ext_player_command = com
     return com
 
+
 compile_ext_player_command()
 
-
 anime_dir = os.path.expanduser('~/anime')
-
 os.makedirs(anime_dir, exist_ok=True)
 
 cachefile = os.path.join(anime_dir, ".cachefile")
 historyfile = os.path.join(anime_dir, ".shell_history")
 logfile = os.path.join(anime_dir, ".anime_history")
 ongoingfile = os.path.join(anime_dir, ".ongoing")
+watchlaterfile = os.path.join(anime_dir, ".watch_later")
+
 
 episode_t = Template("${anime}-episode-${ep}")
 anime_t = Template("category/${anime}")

@@ -31,7 +31,14 @@ def process_anime_name(name):
 
 def get_direct_video_url(gogo_url):
     soup = utils.get_soup(gogo_url)
-    php_l = soup.find('iframe')['src']
+    if not soup:
+        outputs.error_info("The video doesn't exist.")
+        raise SystemExit
+    iframe = soup.find('iframe')
+    if not iframe:
+        outputs.error_info("The video doesn't exist.")
+        raise SystemExit
+    php_l = iframe['src']
     ajx_l = config.ajax_t.substitute(q=php_l.split('?')[1])
     r = requests.get(ajx_l)
     try:

@@ -54,11 +54,11 @@ def normal_tag(*args, end='\n', **kwargs):
     print(Back.RESET + Fore.RESET, end=end)
 
 
-def prompt_val(prompt='', val='', output='normal', sep=": ", reverse=False):
+def prompt_val(prompt='', val='', output='normal', sep=": ", reverse=False, end='\n'):
     if reverse:
         globals()[f'{output}_tag'](val, end='')
-        globals()[f'{output}_info'](sep+prompt)
+        globals()[f'{output}_info'](sep+prompt, end=end)
     else:
         globals()[f'{output}_info'](prompt+sep, end='')
-        globals()[f'{output}_tag'](val)
+        globals()[f'{output}_tag'](val, end=end)
     
