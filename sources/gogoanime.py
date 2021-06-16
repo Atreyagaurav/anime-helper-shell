@@ -2,24 +2,35 @@ import os
 import json
 import re
 from urllib.parse import urljoin
+from string import Template
 
 import requests
 
-import config
 import utils
 import outputs
 
 
+gogoanime_url = 'https://gogoanime.ai'
+
+ajax_t = Template('https://gogo-stream.com/ajax.php?${q}')
+episode_t = Template("${anime}-episode-${ep}")
+anime_t = Template("category/${anime}")
+resume_t = Template("Range: bytes=${size}-")
+search_t = Template(gogoanime_url + "//search.html?keyword=${name}")
+search_page_t = Template(
+    gogoanime_url + "//search.html?keyword=${name}&page=${page}")
+
+
 def get_anime_url(anime_name):
     return urljoin(
-        config.gogoanime_url,
-        config.anime_t.substitute(anime=anime_name.lower().replace(' ', '-')))
+        gogoanime_url,
+        anime_t.substitute(anime=anime_name.lower().replace(' ', '-')))
 
 
 def get_episode_url(anime_name, episode):
     return urljoin(
-        config.gogoanime_url,
-        config.episode_t.substitute(anime=anime_name.lower().replace(' ', '-'),
+        gogoanime_url,
+        episode_t.substitute(anime=anime_name.lower().replace(' ', '-'),
                                     ep=episode))
 
 
@@ -39,7 +50,7 @@ def get_direct_video_url(gogo_url):
         outputs.error_info("The video doesn't exist.")
         raise SystemExit
     php_l = iframe['src']
-    ajx_l = config.ajax_t.substitute(q=php_l.split('?')[1])
+    ajx_l = ajax_t.substitute(q=php_l.split('?')[1])
     r = requests.get(ajx_l)
     try:
         link = json.loads(r.text)['source_bk'][0]['file']
@@ -70,19 +81,19 @@ def get_episodes_range(anime_url):
 
 
 def home_page():
-    soup = utils.get_soup(config.gogoanime_url)
+    soup = utils.get_soup(gogoanime_url)
     div = soup.find('div', {'class': 'last_episodes'})
     eps = []
     for li in div.find_all('li'):
         try:
             link = li.find('a')['href']
-            eps.append(parse_gogo_url(link))
+            eps.append(parse_url(link))
         except SystemExit:
             continue
     return eps
 
 
-def parse_gogo_url(url):
+def parse_url(url):
     whole_name = url.split('/')[-1]
     match = re.match(r'(.+)-episode-([0-9]+)', whole_name)
     if match:

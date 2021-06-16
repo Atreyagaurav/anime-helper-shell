@@ -1,34 +1,6 @@
 import os
-from string import Template
+import sys
 
-QUALITY_PREFERENCE = 720
-
-gogoanime_url = 'https://gogoanime.ai'
-
-ajax_t = Template('https://gogo-stream.com/ajax.php?${q}')
-
-ask_before_open = False
-geometry = '300-0-20'
-fullscreen = True
-
-ext_player_command = ''
-# Should be set from
-# compile_ext_player_command function
-
-
-def compile_ext_player_command():
-    global ext_player_command
-    com = ['mpv']
-    com += [f'--geometry={geometry}']
-    com += ['--on-all-workspaces']
-    if fullscreen:
-        com += ['--fs']
-    com += ['--no-config']
-    ext_player_command = com
-    return com
-
-
-compile_ext_player_command()
 
 anime_dir = os.path.expanduser('~/anime')
 os.makedirs(anime_dir, exist_ok=True)
@@ -40,12 +12,35 @@ ongoingfile = os.path.join(anime_dir, ".ongoing")
 watchlaterfile = os.path.join(anime_dir, ".watch_later")
 
 
-episode_t = Template("${anime}-episode-${ep}")
-anime_t = Template("category/${anime}")
-resume_t = Template("Range: bytes=${size}-")
-search_t = Template(gogoanime_url + "//search.html?keyword=${name}")
-search_page_t = Template(
-    gogoanime_url + "//search.html?keyword=${name}&page=${page}")
+def is_config_line(line):
+    line = line.strip()
+    if not line:
+        return False
+    if line[0] == '#':
+        return False
+    return True
+
+
+
+with open(os.path.join(anime_dir, "shell.conf"), "r") as r:
+    lines = filter(is_config_line, r)
+    configs = dict()
+    for line in lines:
+        key, val = line.split("=", 1)
+        configs[key.strip()] = val.strip(' "\n')
+
+
+ext_player = configs["ext_player"]
+ext_player_flags = configs["ext_player_flags"]
+anime_source = configs["anime_source"]
+video_quality = int(configs["video_quality"])
+
+ext_player_confirm = configs["ext_player_confirm"].lower() in [
+    'true', 'yes', 'on']
+
+ext_player_fullscreen = configs["ext_player_fullscreen"].lower() in [
+    'true', 'yes', 'on']
+
 
 req_headers = {
     "User-Agent":

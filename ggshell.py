@@ -8,7 +8,6 @@ import re
 from requests.exceptions import ConnectionError, ConnectTimeout
 
 import commands
-import gogoanime
 import utils
 import config
 import outputs
@@ -18,7 +17,7 @@ from debug_shell import DebugShell
 class GGshell(cmd.Cmd):
     # These are overriden from cmd.Cmd
     # ANSII scapes for orage bg
-    prompt = "\x1b[43mgogoanime >>\x1b[0m"
+    prompt = "\x1b[43mGanime >>\x1b[0m"
     # to have '-' character in my commands
     identchars = cmd.Cmd.identchars + '-'
     ruler = '-'
@@ -151,10 +150,10 @@ the effect of configurations which won't be saved.
         if self.in_cmdloop:
             self.postloop()
             DebugShell(self).cmdloop(
-                "Debug Shell for gogoanime shell.\n" +
+                "Debug Shell for Ganime shell.\n" +
                 "try `dir()` to see available context variables. " +
                 "This shell is same as python shell but has" +
-                " gogoanime context.")
+                " Ganime context.")
             self.preloop()
         else:
             DebugShell(self).cmdloop()
@@ -293,7 +292,7 @@ USAGE: streamurl [GOGOANIME-URL]
     def complete_url(self, text, line, *ignored):
         lists = set(utils.read_log().keys()).union(
             set(utils.read_cache(complete=True)))
-        urls = map(lambda name: gogoanime.get_episode_url(name, ''), lists)
+        urls = map(lambda name: commands.anime_source_module.get_episode_url(name, ''), lists)
         match = filter(lambda t: t.startswith(text), urls)
         return utils.completion_list(match)
 

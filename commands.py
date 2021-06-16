@@ -5,18 +5,27 @@ import time
 import html2text
 
 import config
-import gogoanime
 import utils
 import outputs
 import notification
 
 
+import players
+import sources
+player_module = getattr(players, config.ext_player)
+player_module.compile_command(
+    flags=config.ext_player_flags,
+    fullscreen=config.ext_player_fullscreen
+)
+anime_source_module = getattr(sources, config.anime_source)
+
+
 def set_quality(quality):
     if quality.isnumeric():
-        config.QUALITY_PREFERENCE = int(quality)
+        config.video_quality = int(quality)
     elif quality.isalnum():
         if re.match(r"[0-9]+p", quality):
-            config.QUALITY_PREFERENCE = int(quality[:-1])
+            config.video_quality = int(quality[:-1])
         else:
             outputs.prompt_val("Invalid quality format", quality, "error")
     else:
@@ -24,12 +33,18 @@ def set_quality(quality):
 
 
 def toggle_fullscreen(value):
-    if value.lower() in ["on", "yes"]:
-        config.fullscreen = True
-        config.compile_ext_player_command()
-    elif value.lower() in ["off", "no"]:
-        config.fullscreen = False
-        config.compile_ext_player_command()
+    if value.lower() in ["on", "yes", "true"]:
+        config.ext_player_fullscreen = True
+        anime_source_module.compile_command(
+            flags=config.ext_player_flags,
+            fullscreen=True
+        )
+    elif value.lower() in ["off", "no", "false"]:
+        config.ext_player_fullscreen = False
+        anime_source_module.compile_command(
+            flags=config.ext_player_flags,
+            fullscreen=False
+        )
     else:
         outputs.prompt_val("Incorrect Argument", value, "error")
     outputs.prompt_val("External Player command",
@@ -38,12 +53,15 @@ def toggle_fullscreen(value):
 
 def set_geometry(value):
     if re.match(r"^([0-9]+-?)+$", value):
-        config.geometry = value
-        config.compile_ext_player_command()
+        player_module.geometry = value
+        player_module.compile_command(
+            flags=config.ext_player_flags,
+            fullscreen=config.ext_player_fullscreen
+        )
     else:
         outputs.prompt_val("Incorrect Argument", value, "error")
     outputs.prompt_val("External Player command",
-                       " ".join(config.ext_player_command))
+                       " ".join(player_module.player_command))
 
 
 def anime_log(args):
@@ -76,7 +94,7 @@ def anime_log(args):
 def play_anime(args):
     name, episodes = read_args(args)
     for e in episodes:
-        url = gogoanime.get_episode_url(name, e)
+        url = anime_source_module.get_episode_url(name, e)
         stream_from_url(url, name, e)
 
 
@@ -127,7 +145,7 @@ def continue_play(args):
 def download_anime(args):
     name, episodes = read_args(args)
     for e in episodes:
-        url = gogoanime.get_episode_url(name, e)
+        url = anime_source_module.get_episode_url(name, e)
         download_from_url(url, name, e)
 
 
@@ -135,9 +153,9 @@ def check_anime(args):
     name, episodes = read_args(args)
     unavail_eps = []
     for e in episodes:
-        url = gogoanime.get_episode_url(name, e)
+        url = anime_source_module.get_episode_url(name, e)
         outputs.normal_info("Testing:", url)
-        durl, ext = gogoanime.get_direct_video_url(url)
+        durl, ext = anime_source_module.get_direct_video_url(url)
         if not durl:
             raise SystemExit("Url for the file not found")
         if not os.path.exists(
@@ -161,8 +179,8 @@ def read_args(args, episodes=True, verbose=True):
     elif "/" in args[0]:
         name = args[0].strip("/").split("/")[-1]
     else:
-        name = gogoanime.process_anime_name(args[0].strip('"'))
-        if not gogoanime.verify_anime_exists(name):
+        name = anime_source_module.process_anime_name(args[0].strip('"'))
+        if not anime_source_module.verify_anime_exists(name):
             outputs.prompt_val("Anime with the name doesn't exist", args[0],
                                "error")
             raise SystemExit
@@ -176,8 +194,8 @@ def read_args(args, episodes=True, verbose=True):
     if len(args) <= 1:
         if verbose:
             outputs.warning_info("Episodes range not given defaulting to all")
-        available_rng = gogoanime.get_episodes_range(
-            gogoanime.get_anime_url(name))
+        available_rng = anime_source_module.get_episodes_range(
+            anime_source_module.get_anime_url(name))
         if verbose:
             outputs.prompt_val("Available episodes", available_rng)
         episodes = utils.extract_range(available_rng)
@@ -192,7 +210,7 @@ def read_args(args, episodes=True, verbose=True):
 
 def list_episodes(args):
     name = read_args(args, episodes=False)
-    available_rng = gogoanime.get_episodes_range(gogoanime.get_anime_url(name))
+    available_rng = anime_source_module.get_episodes_range(anime_source_module.get_anime_url(name))
     if len(args) == 2:
         _, episodes = read_args(args)
         eps = set(episodes)
@@ -252,7 +270,7 @@ def search_anime(args):
 def latest():
     tracklist = utils.read_log(logfile=config.ongoingfile)
     utils.clear_cache()
-    for name, ep in gogoanime.home_page():
+    for name, ep in anime_source_module.home_page():
         outputs.normal_info(f"{name} : ep-{ep}", end=" ")
         utils.write_cache(name, append=True)
         if name in tracklist:
@@ -271,7 +289,7 @@ def import_from_mal(username):
 
 def anime_info(args):
     name = read_args(args, episodes=False)
-    soup = utils.get_soup(gogoanime.get_anime_url(name))
+    soup = utils.get_soup(anime_source_module.get_anime_url(name))
     info = soup.find("div", {"class": "anime_info_body"})
     h = html2text.HTML2Text()
     h.ignore_links = True
@@ -279,13 +297,13 @@ def anime_info(args):
         outputs.normal_info(h.handle(t.decode_contents()), end="")
 
 
-def download_from_url(gogo_url, anime_name=None, episode=None):
+def download_from_url(url, anime_name=None, episode=None):
     if not anime_name or not episode:
-        anime_name, episode = gogoanime.parse_gogo_url(gogo_url)
+        anime_name, episode = anime_source_module.parse_url(url)
     os.makedirs(os.path.join(config.anime_dir, f"./{anime_name}"),
                 exist_ok=True)
-    outputs.prompt_val("Downloading", gogo_url)
-    durl, ext = gogoanime.get_direct_video_url(gogo_url)
+    outputs.prompt_val("Downloading", url)
+    durl, ext = anime_source_module.get_direct_video_url(url)
     if not durl:
         outputs.error_info("Url for the file not found")
         raise SystemExit
@@ -300,20 +318,20 @@ def download_from_url(gogo_url, anime_name=None, episode=None):
 
 def stream_from_url(url, anime_name=None, episode=None, *, local=False):
     if not anime_name or not episode:
-        anime_name, episode = gogoanime.parse_gogo_url(url)
+        anime_name, episode = anime_source_module.parse_url(url)
     if local:
         durl = url
         _, ext = os.path.splitext(durl)
     else:
         outputs.normal_info("Getting Streaming Link:", url)
-        durl, ext = gogoanime.get_direct_video_url(url)
+        durl, ext = anime_source_module.get_direct_video_url(url)
         if not durl:
             outputs.error_info("Url for the file not found")
             raise SystemExit
     outputs.prompt_val("Stream link", durl, "success")
     try:
-        if config.ask_before_open:
-            choice = input("Open External Player? <Y/n>")
+        if config.ext_player_confirm:
+            choice = input(f"Open {config.ext_player} Player? <Y/n>")
             if choice == "" or choice.lower() == "y":
                 pass
             else:
@@ -325,7 +343,7 @@ def stream_from_url(url, anime_name=None, episode=None, *, local=False):
                     end="")
                 time.sleep(0.1)
             outputs.normal_info()
-        retval = utils.play_media(
+        retval = player_module.play_media(
             durl, title=f"ANIME:{anime_name}:ep-{episode}{ext}")
         if retval:
             utils.write_log(anime_name, episode)
@@ -413,8 +431,8 @@ def anime_updates(anime_name=""):
     updates = {}
     for anime, log in anime_list.items():
         episodes = log.split()[1]
-        new_episodes = gogoanime.get_episodes_range(
-            gogoanime.get_anime_url(anime))
+        new_episodes = anime_source_module.get_episodes_range(
+            anime_source_module.get_anime_url(anime))
         new = set(utils.extract_range(new_episodes)).difference(
             set(utils.extract_range(episodes)))
         if len(new) > 0:

@@ -10,7 +10,6 @@ import traceback
 import itertools
 import importlib
 
-import gogoanime
 import commands
 import config
 import outputs
@@ -18,7 +17,8 @@ import utils
 import notification
 
 shell_commands = {
-    "gogoanime": gogoanime,
+    "anime_src": commands.anime_source_module,
+    "player": commands.player_module,
     "commands": commands,
     "config": config,
     "utils": utils,
