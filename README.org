@@ -1,3 +1,9 @@
+
+* NOTE:
+  Doesn't work currently because of changes in the gogoanime website which was the only source till now.
+
+  If I find some other sources which are easier to get the videos from I'll update it.
+
 * Anime Helper Shell
 
 Since I was tired of searching for different websites and different animes to watch. And wanted my player to remember what I watched without having to depend on yet another website.

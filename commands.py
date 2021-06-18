@@ -245,26 +245,7 @@ def list_local_episodes(args):
 
 def search_anime(args):
     name = " ".join(args)
-    url = config.search_t.substitute(name=name)
-    soup = utils.get_soup(url)
-    plist = soup.find("ul", {"class": "pagination-list"})
-    utils.clear_cache()
-
-    def search_results(s):
-        all_res = s.find("ul", {"class": "items"})
-        for list_item in all_res.find_all("li"):
-            an = list_item.p.a["href"].split("/")[-1]
-            utils.write_cache(an, append=True)
-            outputs.normal_info(an, end="  \t")
-            outputs.normal_info(list_item.p.a.text)
-
-    search_results(soup)
-    if plist:
-        for list_item in plist.find_all("li", {"class": None}):
-            url = config.search_page_t.substitute(name=name,
-                                                  page=list_item.a.text)
-            soup = utils.get_soup(url)
-            search_results(soup)
+    anime_source_module.search_anime(name)
 
 
 def latest():

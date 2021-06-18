@@ -54,8 +54,9 @@ def get_direct_video_url(gogo_url):
     r = requests.get(ajx_l)
     try:
         link = json.loads(r.text)['source_bk'][0]['file']
-    except (IndexError, KeyError):
-        outputs.error_info('Unexpected error while obtaining stream url')
+    except (IndexError, KeyError, TypeError) as e:
+        outputs.error_info('Unexpected error while obtaining stream url.')
+        outputs.error_info(f'ERR: {e}')
         raise SystemExit
     _, ext = os.path.splitext(link)
     if ext == '.m3u8':
@@ -124,3 +125,25 @@ def verify_anime_exists(anime_name, verbose=False):
         return True
     else:
         return False
+
+def search_anime(keywords):
+    url = search_t.substitute(name=keywords)
+    soup = utils.get_soup(url)
+    plist = soup.find("ul", {"class": "pagination-list"})
+    utils.clear_cache()
+
+    def search_results(s):
+        all_res = s.find("ul", {"class": "items"})
+        for list_item in all_res.find_all("li"):
+            an = list_item.p.a["href"].split("/")[-1]
+            utils.write_cache(an, append=True)
+            outputs.normal_info(an, end="  \t")
+            outputs.normal_info(list_item.p.a.text)
+
+    search_results(soup)
+    if plist:
+        for list_item in plist.find_all("li", {"class": None}):
+            url = search_page_t.substitute(name=keywords,
+                                                  page=list_item.a.text)
+            soup = utils.get_soup(url)
+            search_results(soup)
