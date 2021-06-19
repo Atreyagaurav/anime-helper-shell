@@ -40,6 +40,22 @@ def process_anime_name(name):
     return name
 
 
+# def get_episode_stream_url(anime, episode):
+#     url = get_episode_url(anime, episode)
+#     soup = utils.get_soup(url)
+#     if not soup:
+#         outputs.error_info("The video doesn't exist.")
+#         raise SystemExit
+#     iframe = soup.find('iframe')
+#     if not iframe:
+#         outputs.error_info("The video doesn't exist.")
+#         raise SystemExit
+#     link = iframe['src']
+#     if not link.startswith('http'):
+#         link = 'https:' + link
+#     return link
+
+
 def get_direct_video_url(gogo_url):
     soup = utils.get_soup(gogo_url)
     if not soup:

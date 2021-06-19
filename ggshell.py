@@ -316,6 +316,15 @@ USAGE: list [ANIME-NAME] [EPISODES-RANGE]
         """
         commands.list_episodes(inp.split())
 
+    def do_web(self, inp):
+        """Play the given episodes of the given anime in browser.
+
+USAGE: web [ANIME-NAME] [EPISODES-RANGE]
+        ANIME-NAME     : Name of the anime, or choice number; defaults to 0
+        EPISODES-RANGE : Range of the episodes, defaults to all
+        """
+        commands.watch_episode_in_web(inp.split())
+
     def do_play(self, inp):
         """Play the given episodes of the given anime.
 

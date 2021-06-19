@@ -3,6 +3,7 @@ import os
 import re
 import time
 import html2text
+import webbrowser
 
 import config
 import utils
@@ -109,6 +110,17 @@ def play_local_anime(args):
         stream_from_url(path, name, e, local=True)
 
 
+def watch_episode_in_web(args):
+    name, episodes = read_args(args, episodes=None)
+    if not episodes:
+        url = anime_source_module.get_anime_url(name)
+        webbrowser.open_new_tab(url)
+        return
+    for e in episodes:
+        url = anime_source_module.get_episode_url(name, e)
+        webbrowser.open_new_tab(url)
+
+
 def update_log(args):
     anime_name, episodes = read_args(args)
     episodes = utils.compress_range(episodes)
@@ -122,7 +134,7 @@ def edit_log(args):
 
 
 def continue_play(args):
-    name = read_args(args, episodes=False)
+    name, _ = read_args(args, episodes=False)
     log = utils.Log(utils.read_log().get(name))
     watch_later = utils.read_log(name, logfile=config.watchlaterfile)
     if watch_later:
@@ -189,27 +201,28 @@ def read_args(args, episodes=True, verbose=True):
         outputs.error_info("Numbers choice invalid, or invalid context.")
         raise SystemExit
 
-    if not episodes:
-        return name
     if len(args) <= 1:
-        if verbose:
-            outputs.warning_info("Episodes range not given defaulting to all")
-        available_rng = anime_source_module.get_episodes_range(
-            anime_source_module.get_anime_url(name))
-        if verbose:
-            outputs.prompt_val("Available episodes", available_rng)
-        episodes = utils.extract_range(available_rng)
+        if episodes:
+            if verbose:
+                outputs.warning_info("Episodes range not given defaulting to all")
+            available_rng = anime_source_module.get_episodes_range(
+                anime_source_module.get_anime_url(name))
+            if verbose:
+                outputs.prompt_val("Available episodes", available_rng)
+            eps = utils.extract_range(available_rng)
+        else:
+            eps = None
     elif len(args) == 2:
-        episodes = utils.extract_range(args[1])
+        eps = utils.extract_range(args[1])
     else:
         outputs.error_info("Too many arguments.\n")
         outputs.normal_info(__doc__)
         raise SystemExit
-    return name, episodes
+    return name, eps
 
 
 def list_episodes(args):
-    name = read_args(args, episodes=False)
+    name, _ = read_args(args, episodes=False)
     available_rng = anime_source_module.get_episodes_range(anime_source_module.get_anime_url(name))
     if len(args) == 2:
         _, episodes = read_args(args)
@@ -269,7 +282,7 @@ def import_from_mal(username):
 
 
 def anime_info(args):
-    name = read_args(args, episodes=False)
+    name, _ = read_args(args, episodes=False)
     soup = utils.get_soup(anime_source_module.get_anime_url(name))
     info = soup.find("div", {"class": "anime_info_body"})
     h = html2text.HTML2Text()
@@ -358,12 +371,13 @@ def save_anime(args):
 
 def track_anime(args):
     """Put an anime into the track list"""
-    anime_name = read_args(args, episodes=False)
+    anime_name, episodes = read_args(args, episodes=False)
     log = utils.read_log(anime_name)
     if log is None:
         outputs.warning_info(
-            "Log entry not found. Setting only new episodes for tracking.")
-        _, episodes = read_args(args)
+            "Log entry not found.")
+        if not episodes:
+            _, episodes = read_args(args)
         episodes = utils.compress_range(episodes)
     else:
         episodes = utils.Log(log).eps
