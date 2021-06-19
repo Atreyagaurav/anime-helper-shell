@@ -1,6 +1,8 @@
 
 * NOTE:
-  Doesn't work currently because of changes in the gogoanime website which was the only source till now.
+  ~play~,, ~download~, ~continue~ commands don't work currently because of changes in the gogoanime website which was the only source till now.
+
+  I have added a ~web~ command to browse the episode page and watch it in the browser for now.
 
   If I find some other sources which are easier to get the videos from I'll update it.
 
