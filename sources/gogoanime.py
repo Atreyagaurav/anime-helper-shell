@@ -10,7 +10,7 @@ import utils
 import outputs
 
 
-gogoanime_url = 'https://gogoanime.ai'
+gogoanime_url = 'https://gogoanime.pe'
 
 ajax_t = Template('https://gogo-stream.com/ajax.php?${q}')
 episode_t = Template("${anime}-episode-${ep}")

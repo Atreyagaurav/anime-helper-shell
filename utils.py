@@ -57,14 +57,16 @@ class Log:
             rep += f' {int(self.last_updated.timestamp())}'
         return rep
 
-    def show(self):
+    @property
+    def _eps(self):
         if len(self.eps) > 10:
             data = re.split(f',|-', self.eps)
-            eps = f'{data[0]}...{data[-1]}'
+            return f'{data[0]}...{data[-1]}'
         else:
-            eps = self.eps
-
-        rep = f'{eps}\t\t{self.anime} ({self.last_updated_fmt})'
+            return self.eps
+    
+    def show(self):
+        rep = f'{self._eps}\t\t{self.anime} ({self.last_updated_fmt})'
         return rep
 
 

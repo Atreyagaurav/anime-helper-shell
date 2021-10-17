@@ -119,6 +119,12 @@ def watch_episode_in_web(args):
     for e in episodes:
         url = anime_source_module.get_episode_url(name, e)
         webbrowser.open_new_tab(url)
+        choice = input(f"did you watch the episode {e}? <Y/n>")
+        if not choice.strip() or choice.strip() in 'Yy':
+            utils.write_log(name, e)
+            utils.update_tracklist(name, e)
+            utils.write_cache(name)
+            utils.update_watchlater(name, e)
 
 
 def update_log(args):
@@ -126,6 +132,8 @@ def update_log(args):
     episodes = utils.compress_range(episodes)
     utils.write_log(anime_name, episodes)
     utils.update_tracklist(anime_name, episodes)
+    utils.write_cache(anime_name)
+    utils.update_watchlater(anime_name, episode)
 
 
 def edit_log(args):
@@ -133,7 +141,7 @@ def edit_log(args):
     utils.write_log(anime_name, utils.compress_range(episodes), append=False)
 
 
-def continue_play(args):
+def continue_play(args, play_func=play_anime):
     name, _ = read_args(args, episodes=False)
     log = utils.Log(utils.read_log().get(name))
     watch_later = utils.read_log(name, logfile=config.watchlaterfile)
@@ -141,7 +149,8 @@ def continue_play(args):
         episodes = utils.extract_range(utils.Log(watch_later).eps)
     else:
         _, episodes = read_args(args)
-    outputs.prompt_val("Watched", log.eps, "success", end='')
+    outputs.prompt_val("Watched",
+                       log._eps, "success", end='\t')
     outputs.normal_info(log.last_updated_fmt)
     if not log.eps:
         last = 0
@@ -149,7 +158,7 @@ def continue_play(args):
         last = int(re.split('-|,', log.eps)[-1])
     to_play = utils.compress_range(filter(lambda e: e > last, episodes))
     if to_play.strip():
-        play_anime([name, to_play])
+        play_func([name, to_play])
     else:
         unsave_anime(name)
 

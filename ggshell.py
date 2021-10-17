@@ -325,6 +325,15 @@ USAGE: web [ANIME-NAME] [EPISODES-RANGE]
         """
         commands.watch_episode_in_web(inp.split())
 
+    def do_webcontinue(self, inp):
+        """Continue playing the given anime in browser.
+
+USAGE: webcontinue [ANIME-NAME]
+        ANIME-NAME     : Name of the anime, or choice number; defaults to 0
+        """
+        commands.continue_play(inp.split(),
+                               play_func=commands.watch_episode_in_web)
+
     def do_play(self, inp):
         """Play the given episodes of the given anime.
 
@@ -335,7 +344,7 @@ USAGE: play [ANIME-NAME] [EPISODES-RANGE]
         commands.play_anime(inp.split())
 
     def complete_play(self, text, line, *ignored):
-        m = re.match(r'play +([0-9a-z-]+) +', line)
+        m = re.match(r'[a-z-]+ +([0-9a-z-]+) +', line)
         if m:
             name = m.group(1)
             log = utils.read_log(name)
@@ -344,6 +353,9 @@ USAGE: play [ANIME-NAME] [EPISODES-RANGE]
             ep = utils.Log(log).eps.split('-')[-1]
             return [str(int(ep) + 1)]
         return self.completedefault(text, line, *ignored)
+
+    complete_web = complete_play
+    complete_watched = complete_play
 
     def do_savelist(self, inp):
         """List the animes saved for watching later.
