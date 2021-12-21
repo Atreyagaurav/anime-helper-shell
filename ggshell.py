@@ -255,6 +255,13 @@ USAGE: latest
         """
         commands.latest()
 
+    def do_new(self, inp):
+        """Get the new animes from the new page.
+
+USAGE: new
+        """
+        commands.new()
+
     def do_updates(self, inp):
         """Get the updates for new episode releases.
 

@@ -354,5 +354,26 @@ def get_episode_path(anime_name,
     return ep_path
 
 
+def display_anime_eps_list(animes_dict):
+    tracklist = read_log(logfile=config.ongoingfile)
+    log = read_log()
+    clear_cache()
+    for name, ep in animes_dict:
+        outputs.normal_info(f"{name} : ep-{ep}" if ep else name, end=" ")
+        write_cache(name, append=True)
+        if name in tracklist:
+            watched = extract_range(Log(tracklist[name]).eps)
+            if not ep:
+                outputs.warning_tag("TRACKED", end="")
+            elif int(ep) in watched:
+                outputs.warning_tag("WATCHED", end="")
+            else:
+                outputs.success_tag("NEW", end="")
+        elif name in log:
+            outputs.success_tag("LOGGED", end="")
+
+        outputs.normal_info()
+
+
 def completion_list(iterator):
     return [f'{s} ' for s in iterator]

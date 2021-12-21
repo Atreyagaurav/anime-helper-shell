@@ -10,7 +10,8 @@ import utils
 import outputs
 
 
-gogoanime_url = 'https://gogoanime.pe'
+gogoanime_url = 'https://gogoanime.cm'
+new_page_url = urljoin(gogoanime_url, "new-season.html")
 
 ajax_t = Template('https://gogo-stream.com/ajax.php?${q}')
 episode_t = Template("${anime}-episode-${ep}")
@@ -97,8 +98,8 @@ def get_episodes_range(anime_url):
     return parsed_rng
 
 
-def home_page():
-    soup = utils.get_soup(gogoanime_url)
+def get_page(url=gogoanime_url):
+    soup = utils.get_soup(url)
     div = soup.find('div', {'class': 'last_episodes'})
     eps = []
     for li in div.find_all('li'):
@@ -109,6 +110,12 @@ def home_page():
             continue
     return eps
 
+def home_page():
+    return get_page()
+
+def new_page():
+    return get_page(new_page_url)
+
 
 def parse_url(url):
     whole_name = url.split('/')[-1]
@@ -116,6 +123,9 @@ def parse_url(url):
     if match:
         anime_name = match.group(1)
         episode = match.group(2)
+    elif "category" in url:
+        anime_name = whole_name
+        episode = None
     else:
         outputs.error_info("URL couldn't be parsed.")
         raise SystemExit

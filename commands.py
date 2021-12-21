@@ -133,7 +133,7 @@ def update_log(args):
     utils.write_log(anime_name, episodes)
     utils.update_tracklist(anime_name, episodes)
     utils.write_cache(anime_name)
-    utils.update_watchlater(anime_name, episode)
+    utils.update_watchlater(anime_name, episodes)
 
 
 def edit_log(args):
@@ -271,18 +271,11 @@ def search_anime(args):
 
 
 def latest():
-    tracklist = utils.read_log(logfile=config.ongoingfile)
-    utils.clear_cache()
-    for name, ep in anime_source_module.home_page():
-        outputs.normal_info(f"{name} : ep-{ep}", end=" ")
-        utils.write_cache(name, append=True)
-        if name in tracklist:
-            watched = utils.extract_range(utils.Log(tracklist[name]).eps)
-            if int(ep) in watched:
-                outputs.warning_tag("WATCHED", end="")
-            else:
-                outputs.success_tag("NEW", end="")
-        outputs.normal_info()
+    utils.display_anime_eps_list(anime_source_module.home_page())
+
+
+def new():
+    utils.display_anime_eps_list(anime_source_module.new_page())
 
 
 def import_from_mal(username):
