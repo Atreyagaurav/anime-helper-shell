@@ -1,19 +1,21 @@
 import os
 import json
 import re
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 from string import Template
 
 import requests
+import subprocess
 
 import utils
 import outputs
+import config
 
 
 gogoanime_url = 'https://gogoanime.cm'
 new_page_url = urljoin(gogoanime_url, "new-season.html")
 
-ajax_t = Template('https://gogo-stream.com/ajax.php?${q}')
+ajax_t = Template('https://gogoplay.io/encrypt-ajax.php?id=${id}&time=23238483783748374')
 episode_t = Template("${anime}-episode-${ep}")
 anime_t = Template("category/${anime}")
 resume_t = Template("Range: bytes=${size}-")
@@ -21,6 +23,7 @@ search_t = Template(gogoanime_url + "//search.html?keyword=${name}")
 search_page_t = Template(
     gogoanime_url + "//search.html?keyword=${name}&page=${page}")
 
+script_path = os.path.join(config.project_dir, 'sources/url-to-videos.sh')
 
 def get_anime_url(anime_name):
     return urljoin(
@@ -57,25 +60,25 @@ def process_anime_name(name):
 #     return link
 
 
+def select_quality(urls):
+    req_quality = f'{config.video_quality}p'
+    for url in urls:
+        if req_quality in url:
+            return url
+
+
 def get_direct_video_url(gogo_url):
-    soup = utils.get_soup(gogo_url)
-    if not soup:
-        outputs.error_info("The video doesn't exist.")
-        raise SystemExit
-    iframe = soup.find('iframe')
-    if not iframe:
-        outputs.error_info("The video doesn't exist.")
-        raise SystemExit
-    php_l = iframe['src']
-    ajx_l = ajax_t.substitute(q=php_l.split('?')[1])
-    r = requests.get(ajx_l)
-    try:
-        link = json.loads(r.text)['source_bk'][0]['file']
-    except (IndexError, KeyError, TypeError) as e:
-        outputs.error_info('Unexpected error while obtaining stream url.')
-        outputs.error_info(f'ERR: {e}')
-        raise SystemExit
-    _, ext = os.path.splitext(link)
+    # got this from ani-cli program since mine broke.
+
+    process = subprocess.Popen(f'bash {script_path} {gogo_url}',
+                               shell=True,
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE)
+    out, err = process.communicate()
+    vids = out.decode().split('\n')
+
+    link = select_quality(vids)
+    _, ext = os.path.splitext(urlparse(link).path)
     if ext == '.m3u8':
         link = utils.get_m3u8_stream(link)
     return link, ext

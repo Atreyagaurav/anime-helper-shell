@@ -11,6 +11,8 @@ logfile = os.path.join(anime_dir, ".anime_history")
 ongoingfile = os.path.join(anime_dir, ".ongoing")
 watchlaterfile = os.path.join(anime_dir, ".watch_later")
 
+project_dir = os.path.abspath(os.path.dirname(__file__))
+
 
 def is_config_line(line):
     line = line.strip()
