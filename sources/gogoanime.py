@@ -12,10 +12,10 @@ import outputs
 import config
 
 
-gogoanime_url = 'https://gogoanime.cm'
+gogoanime_url = 'https://www4.gogoanime.cm'
 new_page_url = urljoin(gogoanime_url, "new-season.html")
 
-ajax_t = Template('https://gogoplay.io/encrypt-ajax.php?id=${id}&time=23238483783748374')
+ajax_t = Template('https://gogoplay.io/encrypt-ajax.php?id=${id}')
 episode_t = Template("${anime}-episode-${ep}")
 anime_t = Template("category/${anime}")
 resume_t = Template("Range: bytes=${size}-")

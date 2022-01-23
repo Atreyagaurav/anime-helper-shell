@@ -20,7 +20,7 @@ def get_command(path, title=None, flags=''):
     com = " ".join(player_command)
     if title:
         com += f' --force-media-title={title}'
-    com += f' {path}'
+    com += f' "{path}"'
     return com
 
 
