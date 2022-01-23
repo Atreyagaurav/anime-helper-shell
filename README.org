@@ -1,22 +1,25 @@
-
-* NOTE:
-  ~play~,, ~download~, ~continue~ commands don't work currently because of changes in the gogoanime website which was the only source till now.
-
-  I have added a ~web~ command to browse the episode page and watch it in the browser for now.
-
-  If I find some other sources which are easier to get the videos from I'll update it.
-
 * Anime Helper Shell
 
 Since I was tired of searching for different websites and different animes to watch. And wanted my player to remember what I watched without having to depend on yet another website.
 
 I created this solution. It's not super useful, or the best, but it works fine for me.
 
-NOTE: it may stop working all of a sudden one day if the site goes down, so I can't guarantee till when it'll work.
+
+* NOTE:
+  It may stop working all of a sudden one day if the site goes down, so I can't guarantee till when it'll work.
+
+  In such cases:
+  
+  ~play~, ~download~, ~continue~ commands won't work because of changes in the gogoanime website which was the only source for now. You can try to fix it by changing the website link in ~sources/gogoanime.py~ file or some other logic in that module. 
+
+  I have added a ~web~ & ~webcontinue~ command to browse the episode page and watch it in the browser in such cases.
+
+  If I find some other sources which are easier to get the videos from I'll update it.
+
+  I also found recently another CLI interface known as [[https://github.com/pystardust/ani-cli][ani-cli]] that has the functionality of ~play~ and ~download~ commands from here (probably more), and have used a small script from there to patch the problem for now, but it might not last long without other people to contribute. My understanding of networking is pretty low so I can't always track down how to reach the source videos to stream.
 
 * Declaimer
 I do not own the videos or the right to distribute the videos which can be accessed through this program. It is just a helper program created for personal purposes and is like a terminal api for gogoanime site to ease the access as well as add the functionality of recording the watched animes and updates.
-
 
 * Usages
 ** Supported devices
