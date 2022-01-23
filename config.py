@@ -11,6 +11,12 @@ logfile = os.path.join(anime_dir, ".anime_history")
 ongoingfile = os.path.join(anime_dir, ".ongoing")
 watchlaterfile = os.path.join(anime_dir, ".watch_later")
 
+configfile = os.path.join(anime_dir, "shell.conf")
+if not os.path.exists(configfile):
+    print(f"Config file doesn't exist in {configfile}")
+    exit(0)
+
+
 project_dir = os.path.abspath(os.path.dirname(__file__))
 
 
@@ -23,8 +29,7 @@ def is_config_line(line):
     return True
 
 
-
-with open(os.path.join(anime_dir, "shell.conf"), "r") as r:
+with open(configfile, "r") as r:
     lines = filter(is_config_line, r)
     configs = dict()
     for line in lines:
