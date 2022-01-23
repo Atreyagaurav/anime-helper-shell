@@ -83,6 +83,8 @@ pip install -r requirements.txt
 
 Make the ~ggshell.py~ executable and then symlink it to ~/usr/local/bin~ or other ~bin~ directory. 
 
+If the anime folder doesn't already exist in your home directory "~/" then create one, and move the shell.conf file into there.
+
 Be sure to edit the ~config.py~ to change the ~ext_media_command~ variable if you use other players than ~mpv~, and change the ~anime_dir~ to the place you want to store your anime.
 
 By defaults it makes ~anime~ directory in your home and stores it there.
