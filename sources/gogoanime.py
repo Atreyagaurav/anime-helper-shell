@@ -12,7 +12,7 @@ import outputs
 import config
 
 
-gogoanime_url = 'https://www4.gogoanime.cm'
+gogoanime_url = 'https://www1.gogoanime.pe'
 new_page_url = urljoin(gogoanime_url, "new-season.html")
 
 ajax_t = Template('https://gogoplay.io/encrypt-ajax.php?id=${id}')
