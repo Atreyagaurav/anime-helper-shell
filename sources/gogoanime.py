@@ -64,7 +64,8 @@ def select_quality(urls):
     req_quality = f'{config.video_quality}p'
     for url in urls:
         if req_quality in url:
-            return url
+            break
+    return url
 
 
 def get_direct_video_url(gogo_url):
@@ -75,7 +76,7 @@ def get_direct_video_url(gogo_url):
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE)
     out, err = process.communicate()
-    vids = out.decode().split('\n')
+    vids = out.decode().strip().split('\n')
 
     link = select_quality(vids)
     _, ext = os.path.splitext(urlparse(link).path)
