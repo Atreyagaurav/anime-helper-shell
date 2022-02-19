@@ -18,7 +18,7 @@ I created this solution. It's not super useful, or the best, but it works fine f
 
   I also found recently another CLI interface known as [[https://github.com/pystardust/ani-cli][ani-cli]] that has the functionality of ~play~ and ~download~ commands from here (probably more), and have used a small script from there to patch the problem for now, but it might not last long without other people to contribute. My understanding of networking is pretty low so I can't always track down how to reach the source videos to stream.
 
-* Declaimer
+* Disclaimer
 I do not own the videos or the right to distribute the videos which can be accessed through this program. It is just a helper program created for personal purposes and is like a terminal api for gogoanime site to ease the access as well as add the functionality of recording the watched animes and updates.
 
 * Usages
@@ -74,6 +74,9 @@ This is still a prototype so it isn't very good.
 
 * Installation
 Clone this repository. 
+#+begin_src bash
+git clone https://github.com/Atreyagaurav/anime-helper-shell.git && cd anime-helper-shell
+#+end_src
 
 Install the requirements.
 
@@ -82,6 +85,10 @@ pip install -r requirements.txt
 #+end_src
 
 Make the ~ggshell.py~ executable and then symlink it to ~/usr/local/bin~ or other ~bin~ directory. 
+#+begin_src bash
+chmod +x ggshell.py
+ln <full path to ggshell.py> /usr/local/bin/ggshell.py
+#+end_src
 
 If the anime folder doesn't already exist in your home directory "~/" then create one, and move the shell.conf file into there.
 
