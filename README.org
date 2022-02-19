@@ -72,7 +72,7 @@ You can use the ~shell~ command or ~!~ at the beginning to run that command in g
 
 This is still a prototype so it isn't very good. 
 
-* Installation
+* Installation (Linux & Mac OS)
 Clone this repository. 
 #+begin_src bash
 git clone https://github.com/Atreyagaurav/anime-helper-shell.git && cd anime-helper-shell
@@ -87,10 +87,18 @@ pip install -r requirements.txt
 Make the ~ggshell.py~ executable and then symlink it to ~/usr/local/bin~ or other ~bin~ directory. 
 #+begin_src bash
 chmod +x ggshell.py
-ln <full path to ggshell.py> /usr/local/bin/ggshell.py
+ln -s <full path to ggshell.py> /usr/local/bin/ggshell.py
 #+end_src
 
 If the anime folder doesn't already exist in your home directory "~/" then create one, and move the shell.conf file into there.
+#+begin_src bash
+mkdir ~/anime
+#+end_src
+
+#+begin_src bash
+cp shell.conf ~/anime
+#+end_src
+
 
 Be sure to edit the ~config.py~ to change the ~ext_media_command~ variable if you use other players than ~mpv~, and change the ~anime_dir~ to the place you want to store your anime.
 
