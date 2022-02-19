@@ -21,6 +21,39 @@ I created this solution. It's not super useful, or the best, but it works fine f
 * Disclaimer
 I do not own the videos or the right to distribute the videos which can be accessed through this program. It is just a helper program created for personal purposes and is like a terminal api for gogoanime site to ease the access as well as add the functionality of recording the watched animes and updates.
 
+* Installation (Linux & Mac OS)
+Clone this repository. 
+#+begin_src bash
+git clone https://github.com/Atreyagaurav/anime-helper-shell.git && cd anime-helper-shell
+#+end_src
+
+Install the requirements.
+
+#+begin_src bash
+pip install -r requirements.txt
+#+end_src
+
+Make the ~ggshell.py~ executable and then symlink it to ~/usr/local/bin~ or other ~bin~ directory. 
+#+begin_src bash
+chmod +x ggshell.py
+ln -s <full path to ggshell.py> /usr/local/bin/ggshell.py
+#+end_src
+
+If the anime folder doesn't already exist in your home directory "~/" then create one, and move the shell.conf file into there.
+#+begin_src bash
+mkdir ~/anime
+#+end_src
+
+#+begin_src bash
+cp shell.conf ~/anime
+#+end_src
+
+
+Be sure to edit the ~config.py~ to change the ~ext_media_command~ variable if you use other players than ~mpv~, and change the ~anime_dir~ to the place you want to store your anime.
+
+By defaults it makes ~anime~ directory in your home and stores it there.
+You can symlink your anime storage directory to home too. 
+
 * Usages
 ** Supported devices
 Till now it works on (tested only on these; can probably work on others too):
@@ -71,39 +104,6 @@ If you are familiar with python, now only can you edit the code, you can also us
 You can use the ~shell~ command or ~!~ at the beginning to run that command in ggshell but unlike there you can look at the error and analyze the problem here.
 
 This is still a prototype so it isn't very good. 
-
-* Installation (Linux & Mac OS)
-Clone this repository. 
-#+begin_src bash
-git clone https://github.com/Atreyagaurav/anime-helper-shell.git && cd anime-helper-shell
-#+end_src
-
-Install the requirements.
-
-#+begin_src bash
-pip install -r requirements.txt
-#+end_src
-
-Make the ~ggshell.py~ executable and then symlink it to ~/usr/local/bin~ or other ~bin~ directory. 
-#+begin_src bash
-chmod +x ggshell.py
-ln -s <full path to ggshell.py> /usr/local/bin/ggshell.py
-#+end_src
-
-If the anime folder doesn't already exist in your home directory "~/" then create one, and move the shell.conf file into there.
-#+begin_src bash
-mkdir ~/anime
-#+end_src
-
-#+begin_src bash
-cp shell.conf ~/anime
-#+end_src
-
-
-Be sure to edit the ~config.py~ to change the ~ext_media_command~ variable if you use other players than ~mpv~, and change the ~anime_dir~ to the place you want to store your anime.
-
-By defaults it makes ~anime~ directory in your home and stores it there.
-You can symlink your anime storage directory to home too. 
 
 ** Mpv Plugin
 There is a cfiles folder with c codes for mpv plugin and status checking program, both can be compiled with ~make~ and installed with ~make install~.
