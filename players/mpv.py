@@ -1,5 +1,6 @@
 import time
 import subprocess
+import outputs
 
 geometry = '300-0-20'
 

@@ -101,6 +101,12 @@ You can symlink your anime storage directory to home too.
 There is a cfiles folder with c codes for mpv plugin and status checking program, both can be compiled with ~make~ and installed with ~make install~.
 Just update the path macros on the C files and then compile with make (I don't know how to make that automatic with make right now - help will be appreciated.)
 
+There are some scripts in ~extras~ folders, which can be used to visualize the log from these plugins.
+
+The ~process.py~ processes the log and ~visualize.py~ is for visualization. Here is an example plots.
+
+[[./extras/plot.png]]
+
 * Known Bugs
 - Sometimes the input has residue texts from long command lines.
 - Sometimes the mpv can't stream the stream link obtained with 403: Forbidden error.

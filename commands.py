@@ -340,7 +340,7 @@ def stream_from_url(url, anime_name=None, episode=None, *, local=False):
                 time.sleep(0.1)
             outputs.normal_info()
         retval = player_module.play_media(
-            durl, title=f"ANIME:{anime_name}:ep-{episode}{ext}")
+            durl, title=f"Ganime:{anime_name}:ep-{episode}{ext}")
         if retval:
             utils.write_log(anime_name, episode)
             utils.update_tracklist(anime_name, episode)
