@@ -2,7 +2,7 @@ import time
 import subprocess
 import outputs
 
-#geometry = '300-0-20'
+geometry = '300-0-20'
 
 player_command = ''
 
@@ -10,7 +10,7 @@ player_command = ''
 def compile_command(flags='', fullscreen=False):
     global player_command
     com = [f'mpv {flags}']
- #   com += [f'--geometry={geometry}']
+    com += [f'--geometry={geometry}']
     if fullscreen:
         com += ['--fs']
     player_command = com
