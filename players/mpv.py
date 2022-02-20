@@ -2,7 +2,8 @@ import time
 import subprocess
 import outputs
 
-geometry = '300-0-20'
+# you can add custom parameters, for having a minimized mpv: format is: widthxheight ± x ± y ; example: "300-0-20"
+geometry = ''
 
 player_command = ''
 
