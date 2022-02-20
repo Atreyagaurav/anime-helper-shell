@@ -10,7 +10,8 @@ player_command = ''
 def compile_command(flags='', fullscreen=False):
     global player_command
     com = [f'mpv {flags}']
-    com += [f'--geometry={geometry}']
+    if geometry:
+        com += [f'--geometry={geometry}']
     if fullscreen:
         com += ['--fs']
     player_command = com
