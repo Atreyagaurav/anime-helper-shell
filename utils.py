@@ -279,7 +279,7 @@ def compress_range(range_list):
 def extract_range(range_str):
     if range_str is None or range_str.strip() == '':
         return
-    ranges = range_str.split(',')
+    ranges = range_str.replace(" ", "").split(',')
     try:
         for r in ranges:
             if r.strip() == '':

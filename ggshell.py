@@ -440,13 +440,18 @@ USAGE: edit [ANIME-NAME] [EPISODES-RANGE]
         commands.edit_log(inp.split())
 
     def do_save(self, inp):
-        """Save the anime or episodes to watch later list.
+        """Save the anime or episodes to watch later list. `continue` command
+will use this list to decide what to play next, great for skipping
+filler episodes.
 
 USAGE: save [ANIME-NAME] [EPISODES-RANGE]
         ANIME-NAME     : Name of the anime, or choice number; defaults to 0
-        EPISODES-RANGE : Range of the episodes, defaults to all
+        EPISODES-RANGE : Range of the episodes, defaults to all,
+          can be copied from the list of episodes in websites like:
+          https://www.animefillerlist.com
+
         """
-        commands.save_anime(inp.split())
+        commands.save_anime(inp.split(maxsplit=1))
 
     def do_continue(self, inp):
         """Play the given anime's unwatched episodes from the start.
