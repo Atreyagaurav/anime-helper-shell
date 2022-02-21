@@ -282,10 +282,12 @@ USAGE: notify [ANIME-NAME]
 
     complete_notify = complete_untrack
 
-    def do_url(self, inp):
+    def do_downloadurl(self, inp):
         """Downloads the anime episode from given gogoanime url
-USAGE: url [GOGOANIME-URL]
+USAGE: downloadurl [GOGOANIME-URL]
         GOGOANIME-URL : Url of the episode from gogoanime website.
+
+related commands: download, streamurl
 """
         commands.download_from_url(inp)
 
@@ -293,10 +295,12 @@ USAGE: url [GOGOANIME-URL]
         """Streams the anime episode from given gogoanime url
 USAGE: streamurl [GOGOANIME-URL]
         GOGOANIME-URL : Url of the episode from gogoanime website.
+
+related commands: play, continue
 """
         commands.stream_from_url(inp)
 
-    def complete_url(self, text, line, *ignored):
+    def complete_downloadurl(self, text, line, *ignored):
         lists = set(utils.read_log().keys()).union(
             set(utils.read_cache(complete=True)))
         urls = map(lambda name: commands.anime_source_module.get_episode_url(name, ''), lists)
@@ -311,6 +315,8 @@ USAGE: streamurl [GOGOANIME-URL]
 USAGE: download [ANIME-NAME] [EPISODES-RANGE]
         ANIME-NAME     : Name of the anime, or choice number; defaults to 0
         EPISODES-RANGE : Range of the episodes, defaults to all
+
+related commands: play, continue, streamurl
         """
         commands.download_anime(inp.split())
 
@@ -320,6 +326,8 @@ USAGE: download [ANIME-NAME] [EPISODES-RANGE]
 USAGE: list [ANIME-NAME] [EPISODES-RANGE]
         ANIME-NAME     : Name of the anime, or choice number; defaults to 0
         EPISODES-RANGE : Range of the episodes, defaults to all
+
+related commands: info, local
         """
         commands.list_episodes(inp.split())
 
@@ -329,6 +337,8 @@ USAGE: list [ANIME-NAME] [EPISODES-RANGE]
 USAGE: web [ANIME-NAME] [EPISODES-RANGE]
         ANIME-NAME     : Name of the anime, or choice number; defaults to 0
         EPISODES-RANGE : Range of the episodes, defaults to all
+
+related commands: play, continue, webcontinue
         """
         commands.watch_episode_in_web(inp.split())
 
@@ -347,6 +357,8 @@ USAGE: webcontinue [ANIME-NAME]
 USAGE: play [ANIME-NAME] [EPISODES-RANGE]
         ANIME-NAME     : Name of the anime, or choice number; defaults to 0
         EPISODES-RANGE : Range of the episodes, defaults to all
+
+related commands: continue, web, streamurl
         """
         commands.play_anime(inp.split())
 
@@ -365,9 +377,13 @@ USAGE: play [ANIME-NAME] [EPISODES-RANGE]
     complete_watched = complete_play
 
     def do_savelist(self, inp):
-        """List the animes saved for watching later.
+        """List the animes saved for watching later. The continue command will
+use this list to decide which episode to watch next. Useful for
+skipping fillers.
 
 USAGE: savelist
+
+related commands: save, unsave
         """
         commands.list_saved_anime()
 
@@ -376,6 +392,8 @@ USAGE: savelist
 
 USAGE: unsave [ANIME-NAME]
         ANIME-NAME     : Name of the anime
+
+related commands: savelist, save
         """
         commands.unsave_anime(inp.strip())
 

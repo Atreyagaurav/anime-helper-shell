@@ -10,9 +10,10 @@ import utils
 import outputs
 import notification
 
-
 import players
 import sources
+
+
 player_module = getattr(players, config.ext_player)
 player_module.compile_command(
     flags=config.ext_player_flags,
