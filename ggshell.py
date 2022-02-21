@@ -307,7 +307,7 @@ related commands: play, continue
         match = filter(lambda t: t.startswith(text), urls)
         return utils.completion_list(match)
 
-    complete_streamurl = complete_url
+    complete_streamurl = complete_downloadurl
 
     def do_download(self, inp):
         """Download the anime episodes in given range
