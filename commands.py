@@ -37,20 +37,20 @@ def set_quality(quality):
 def toggle_fullscreen(value):
     if value.lower() in ["on", "yes", "true"]:
         config.ext_player_fullscreen = True
-        anime_source_module.compile_command(
+        player_module.compile_command(
             flags=config.ext_player_flags,
             fullscreen=True
         )
     elif value.lower() in ["off", "no", "false"]:
         config.ext_player_fullscreen = False
-        anime_source_module.compile_command(
+        player_module.compile_command(
             flags=config.ext_player_flags,
             fullscreen=False
         )
     else:
         outputs.prompt_val("Incorrect Argument", value, "error")
     outputs.prompt_val("External Player command",
-                       " ".join(config.ext_player_command))
+                       " ".join(player_module.player_command))
 
 
 def set_geometry(value):

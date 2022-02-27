@@ -148,7 +148,7 @@ def get_m3u8_stream(m3u8_url):
         flag = False
         for p in media.playlists:
             if (p.stream_info.resolution[1] <=
-                    config.QUALITY_PREFERENCE) or (not flag):
+                    config.video_quality) or (not flag):
                 m3u8_url = p.absolute_uri
                 flag = True
     return m3u8_url
@@ -220,7 +220,7 @@ def remove_anime_from_log(anime_name, logfile=config.logfile):
         map(Log, anime_list.values()),
         key=lambda l: ((int(l.last_updated.timestamp()) if l.last_updated else 0) -  # - since it's reverse
                   (ord(l.anime[0])-ord('a'))/26),
-        reverse=True)
+        reverse=False)
     with open(logfile, "w") as w:
         for log in logs:
             w.write(f"{str(log)}\n")
