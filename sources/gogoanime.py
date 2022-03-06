@@ -1,10 +1,8 @@
 import os
-import json
 import re
 from urllib.parse import urljoin, urlparse
 from string import Template
 
-import requests
 import subprocess
 
 import utils
@@ -25,6 +23,7 @@ search_page_t = Template(
 
 script_path = os.path.join(config.project_dir, 'sources/url-to-videos.sh')
 
+
 def get_anime_url(anime_name):
     return urljoin(
         gogoanime_url,
@@ -34,8 +33,9 @@ def get_anime_url(anime_name):
 def get_episode_url(anime_name, episode):
     return urljoin(
         gogoanime_url,
-        episode_t.substitute(anime=anime_name.lower().replace(' ', '-'),
-                                    ep=episode))
+        episode_t.substitute(
+            anime=anime_name.lower().replace(' ', '-'),
+            ep=episode))
 
 
 def process_anime_name(name):
@@ -114,8 +114,10 @@ def get_page(url=gogoanime_url):
             continue
     return eps
 
+
 def home_page():
     return get_page()
+
 
 def new_page():
     return get_page(new_page_url)
