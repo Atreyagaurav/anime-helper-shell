@@ -7,6 +7,12 @@ geometry = ''
 player_command = ''
 
 
+def set_geometry(geom):
+    global geometry
+    geometry = geom
+    compile_command()
+
+
 def compile_command(flags='', fullscreen=False):
     global player_command
     com = [f'mpv {flags}']
@@ -14,19 +20,23 @@ def compile_command(flags='', fullscreen=False):
         com += [f'--geometry={geometry}']
     if fullscreen:
         com += ['--fs']
-    player_command = com
+    player_command = com + flags
     return com
+
+
+def get_player_command():
+    return " ".join(player_command)
 
 
 def get_command(path, title=None, flags=''):
     com = " ".join(player_command)
     if title:
         com += f' --force-media-title={title}'
-    com += f' "{path}"'
+    com += flags + f' "{path}"'
     return com
 
 
-def play_media(link, title=None, fullscreen=False):
+def play_media(link, title=None):
     while True:
         t1 = time.time()
         ret_val = subprocess.call(get_command(link, title),

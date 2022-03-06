@@ -158,6 +158,7 @@ def verify_anime_exists(anime_name, verbose=False):
     else:
         return False
 
+
 def search_anime(keywords):
     url = search_t.substitute(name=keywords)
     soup = utils.get_soup(url)
@@ -176,6 +177,6 @@ def search_anime(keywords):
     if plist:
         for list_item in plist.find_all("li", {"class": None}):
             url = search_page_t.substitute(name=keywords,
-                                                  page=list_item.a.text)
+                                           page=list_item.a.text)
             soup = utils.get_soup(url)
             search_results(soup)
