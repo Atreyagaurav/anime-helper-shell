@@ -20,7 +20,7 @@ def compile_command(flags='', fullscreen=False):
         com += [f'--geometry={geometry}']
     if fullscreen:
         com += ['--fs']
-    player_command = com + flags
+    player_command = com + [flags]
     return com
 
 
