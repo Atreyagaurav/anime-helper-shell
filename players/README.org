@@ -1,0 +1,42 @@
+* Player modules
+  The modules in this path are used to play the media, choose one among these from ~shell.conf~ in your anime directory.
+
+  
+* Currently Available
+  
+** mpv
+   mpv player is the only one currently available.
+
+   
+* Adding new ones
+  To add a new module make a new .py file in this directory and make a pull request.
+
+  the module should have following functions and variables.
+  
+** compile_command
+   Should change player command using the latest config or arguments.
+
+   arguments: ~(flags='', fullscreen=False)~
+
+** get_player_command
+   Should return current player command.
+
+** set_geometry
+   should set the geometry in the module or/and player command.
+
+** play_media
+   Should be able to play the media in the player.
+
+   Arguments: ~(link, title=None)~
+
+   link can be both streamable link or local file path.
+
+* Plans to add
+  Would prefer to add the followings, contributions are welcome.
+
+  
+** Termux
+   A termux option that would open the player from android.
+   
+** vlc
+   Since many people use it, would be nice to be added.

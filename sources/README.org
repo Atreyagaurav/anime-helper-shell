@@ -1,0 +1,49 @@
+* Sources modules
+
+  These are used by the shell to communicate with whichever source you choose in your config file (~shell.conf~ in your anime dir).
+
+  
+* Currently available ones
+  
+** gogoanime
+   This source uses gogoanime website to get the episodes informations and all.
+
+   
+* Adding new source
+  You can add new sources by putting more modules in this directory.
+
+  The module you define needs the following functions
+
+** get_anime_url
+   should be able to provide url for that anime based on parameters ~(anime_name)~.
+
+** get_direct_video_url
+   should be able to reuturn a stream-able video url & it's extension in tuple ~(url, ext)~ from parameter ~anime_episode_url~.
+   
+** get_episode_url
+   should be able to provide the url where we can watch the episode from a browser based on parameters ~(anime_name, episode)~.
+   
+** get_episodes_range
+   should be able to provide the available episodes range in human readable format from parameter ~anime_url~.
+   
+** home_page
+   List of anime episodes in home page (latest updated episodes).
+   
+** new_page
+   List of animes in current season.
+   
+** parse_url
+   Should be able to return tuple ~(anime_name, episode)~ from given episode url.
+   
+** process_anime_name
+   Should be able to process raw human readable anime name into anime name used by the source website.
+   
+** search_anime
+   Should be able to print out all the anime names matching the search terms.
+   
+** verify_anime_exists
+   Should be able to check if a anime with given name exists with parameter ~anime_name~. Optional parameter ~verbose~ for debugging purposes which shows where the information was obtained from (like was the anime name in logs, in cache, downloaded locally or from online source).
+
+
+* Plans to add
+  Prefer to add more sources in future. I don't have a list right now, but more sub sources or some raw sources with jp subs would be nice.

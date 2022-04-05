@@ -50,12 +50,12 @@ def toggle_fullscreen(value):
     else:
         outputs.prompt_val("Incorrect Argument", value, "error")
     outputs.prompt_val("External Player command",
-                       " ".join(player_module.player_command))
+                       player_module.get_player_command())
 
 
 def set_geometry(value):
     if re.match(r"^([0-9]+-?)+$", value):
-        player_module.geometry = value
+        player_module.set_geometry(value)
         player_module.compile_command(
             flags=config.ext_player_flags,
             fullscreen=config.ext_player_fullscreen
@@ -63,7 +63,7 @@ def set_geometry(value):
     else:
         outputs.prompt_val("Incorrect Argument", value, "error")
     outputs.prompt_val("External Player command",
-                       " ".join(player_module.player_command))
+                       player_module.get_player_command())
 
 
 def anime_log(args):

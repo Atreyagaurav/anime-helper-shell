@@ -1,10 +1,7 @@
 import os
 import re
 import math
-import time
 import datetime as dt
-import subprocess
-
 import pycurl
 import m3u8
 import requests
@@ -19,18 +16,24 @@ class Log:
     def __init__(self, logline, eps=None):
         if not logline:
             self.anime = ''
+            self.source = config.anime_source
             self.eps = ''
             self.last_updated = None
             return
         data = logline.split()
-        self.anime = data[0]
+        if len(data) == 1:      # only anime name
+            self.anime = data[0]
+            self.source = config.anime_source
+        else:
+            self.source = data[0]
+            self.anime = data[1]
         if eps:
             self.eps = eps
             self.last_updated = dt.datetime.now()
         else:
-            self.eps = data[1]
-            if len(data) > 2:
-                self.last_updated = dt.datetime.fromtimestamp(int(data[2]))
+            self.eps = data[2]
+            if len(data) > 3:
+                self.last_updated = dt.datetime.fromtimestamp(int(data[3]))
             else:
                 self.last_updated = None
 
@@ -52,7 +55,7 @@ class Log:
         return self
 
     def __str__(self):
-        rep = f'{self.anime} {self.eps}'
+        rep = (f'{self.source} {self.anime} {self.eps}')
         if self.last_updated:
             rep += f' {int(self.last_updated.timestamp())}'
         return rep
@@ -60,13 +63,16 @@ class Log:
     @property
     def _eps(self):
         if len(self.eps) > 10:
-            data = re.split(f',|-', self.eps)
+            data = re.split(',|-', self.eps)
             return f'{data[0]}...{data[-1]}'
         else:
             return self.eps
-    
+
     def show(self):
-        rep = f'{self._eps}\t\t{self.anime} ({self.last_updated_fmt})'
+        rep = f'{outputs.Fore.BLUE}{self.source}{outputs.Fore.RESET}'
+        rep += f' {self._eps}\t\t{self.anime}'
+        if self.last_updated:
+            rep += f' ({self.last_updated_fmt})'
         return rep
 
 
@@ -188,11 +194,12 @@ def read_log(anime_name=None,
     if not os.path.exists(logfile):
         log = dict()
     else:
+        # TODO need to rewrite this to use Log class
         log = {
-            line[0]: " ".join(line)
+            line[1]: " ".join(line)
             for i, line in enumerate(li.strip().split()
                                      for li in open(logfile, 'r')
-                                     if pattern.match(li.split()[0]))
+                                     if pattern.match(li.split()[1]))
             if i < number
         }
     if not anime_name:
@@ -218,7 +225,9 @@ def remove_anime_from_log(anime_name, logfile=config.logfile):
         return
     logs = sorted(
         map(Log, anime_list.values()),
-        key=lambda l: ((int(l.last_updated.timestamp()) if l.last_updated else 0) -  # - since it's reverse
+        key=lambda l: ((
+            int(l.last_updated.timestamp())
+            if l.last_updated else 0) +
                   (ord(l.anime[0])-ord('a'))/26),
         reverse=False)
     with open(logfile, "w") as w:
@@ -233,6 +242,7 @@ def update_tracklist(anime_name, episodes, append=True):
                   episodes,
                   append=append,
                   logfile=config.ongoingfile)
+
 
 def update_watchlater(anime_name, episode=None):
     log = read_log(anime_name, logfile=config.watchlaterfile)
