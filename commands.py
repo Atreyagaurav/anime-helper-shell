@@ -428,7 +428,7 @@ def anime_updates(anime_name=""):
         }
     updates = {}
     for anime, log in anime_list.items():
-        episodes = log.split()[1]
+        episodes = log.split()[2]  # FIX: use log object
         new_episodes = anime_source_module.get_episodes_range(
             anime_source_module.get_anime_url(anime))
         new = set(utils.extract_range(new_episodes)).difference(

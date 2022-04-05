@@ -1,5 +1,4 @@
 import os
-import sys
 
 
 anime_dir = os.path.expanduser('~/anime')
@@ -64,5 +63,5 @@ down_headers = {
     "Accept":
     "video/webm,video/ogg,video/*;q=0.9,application/ogg;q=0.7,audio/*;q=0.6,*/*;q=0.5",
     "Accept-Language": "en-US,en;q=0.5",
-    "referer":"https://gogoanime.film/"
+    "referer":"https://gogoanime.gg/"
 }
