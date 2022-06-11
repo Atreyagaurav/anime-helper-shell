@@ -380,7 +380,7 @@ def display_anime_eps_list(animes_dict):
             else:
                 outputs.success_tag("NEW", end="")
         elif name in log:
-            outputs.success_tag("LOGGED", end="")
+            outputs.normal_tag("LOGGED", end="")
 
         outputs.normal_info()
 
