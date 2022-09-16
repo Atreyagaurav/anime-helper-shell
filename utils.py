@@ -151,13 +151,17 @@ def download_m3u8(url, filepath, replace=False):
 def get_m3u8_stream(m3u8_url):
     media = m3u8.load(m3u8_url)
     if media.data['is_variant']:
-        flag = False
-        for p in media.playlists:
-            if (p.stream_info.resolution[1] <=
-                    config.video_quality) or (not flag):
-                m3u8_url = p.absolute_uri
-                flag = True
-    return m3u8_url
+        res = sorted(((i, p.stream_info.resolution[1])
+                      for i, p in enumerate(media.playlists)),
+                     key=lambda x: x[1])
+        res_high = list(filter(lambda r: r[1] >= config.video_quality, res))
+        if len(res_high) == 0:
+            # if higher than config not available choose best
+            ind = res[-1][0]
+        else:
+            # choose the closest but > the config 
+            ind = res_high[0][0]
+    return media.playlists[ind].absolute_uri
 
 
 def read_cache(num=1, complete=False):

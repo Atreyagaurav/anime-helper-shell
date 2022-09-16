@@ -68,9 +68,9 @@ def select_quality(urls):
 
 
 def get_direct_video_url(gogo_url):
-    # got this from ani-cli program since mine broke.
     url = get_episode_stream_url(gogo_url)
 
+    # got this from ani-cli program since mine broke.
     process = subprocess.Popen(f'bash {script_path} {url}',
                                shell=True,
                                stdout=subprocess.PIPE,
