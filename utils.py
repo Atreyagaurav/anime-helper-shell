@@ -161,7 +161,8 @@ def get_m3u8_stream(m3u8_url):
         else:
             # choose the closest but > the config 
             ind = res_high[0][0]
-    return media.playlists[ind].absolute_uri
+        return media.playlists[ind].absolute_uri
+    return m3u8_url
 
 
 def read_cache(num=1, complete=False):
