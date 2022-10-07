@@ -78,8 +78,9 @@ class Log:
 
 def get_soup(url):
     r = requests.get(url, headers=config.req_headers)
-    if r.status_code == 404:
-        return None
+    if r.status_code != 200:
+        outputs.error_info(f"Request Failed: {url}")
+        raise SystemExit
     return BeautifulSoup(r.text, 'html.parser')
 
 
@@ -388,6 +389,18 @@ def display_anime_eps_list(animes_dict):
             outputs.normal_tag("LOGGED", end="")
 
         outputs.normal_info()
+    return
+
+
+def canon_episodes(anime_name, episodes=None):
+    url = f"https://www.animefillerlist.com/shows/{anime_name}"
+    soup = get_soup(url)
+    eps_str = soup.find("div", {"class": "manga_canon"}).text.split(":")[-1]
+    rng = extract_range(eps_str)
+    if episodes:
+        episodes = set(episodes)
+        rng = filter(lambda x: x in episodes, rng)
+    return compress_range(rng)
 
 
 def completion_list(iterator):

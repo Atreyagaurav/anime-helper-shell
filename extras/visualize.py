@@ -21,9 +21,22 @@ while day <= daily.date.max():
         daily.loc[(day.year,
                    day.month,
                    day.day), :] = [0, calendar.day_name[day.dayofweek], day]
-        day += dt.timedelta(days=1)
+    day += dt.timedelta(days=1)
 
 daily.sort_index(inplace=True)
+filt_index = (daily.watchtime > 0).to_list()
+
+i = 1
+while i < len(filt_index)-1:
+    if filt_index[i] is True:
+        if filt_index[i-1] is False:
+            filt_index[i-1] = True
+        if filt_index[i+1] is False:
+            filt_index[i+1] = True
+            i += 1
+    i += 1
+
+daily = daily[filt_index]
 
 weekdays = daily.groupby('dayofweek').watchtime.mean() / 3600
 days_dict = {d: i for i, d in enumerate(calendar.day_name)}
@@ -40,14 +53,14 @@ all_animes = pd.pivot_table(df,
                             values='watchtime',
                             aggfunc='sum').fillna(0)
 
-animes = all_animes[all_animes.apply(sum, axis=1) > 1800]  # At least 30 minutes of watchtime
+animes = all_animes[all_animes.apply(sum, axis=1) > 3600*4]  # At least 4 hours of watchtime
 other_animes = all_animes[all_animes.apply(sum, axis=1) <= 1800]  # remaining
 others = other_animes.sum() / 3600
 animes /= 3600
 # animes = df.groupby(['anime', 'dayofweek']).episode.count()
 animes.index = animes.index.map(lambda x: x
                                 if len(x) < 30 else x[:17] + '...' + x[-10:])
-animes.sort_index(inplace=True)
+animes = animes.sort_index()
 animes.loc['others', :] = others
 
 # watchtime = df.groupby('anime').watchtime.sum()
@@ -82,14 +95,14 @@ with plt.style.context("ggplot"):
         h = sum((top_bars[j][i].get_height() for j in range(len(top_bars))))
         if h > mean_h:
             h = 0
-            top.annotate(
-                animes.index[i],
-                xy=(bar.get_x() + bar.get_width() / 2, h),
-                xytext=(0, 3),  # 3 points vertical offset
-                textcoords="offset points",
-                rotation=90,
-                ha='center',
-                va='bottom')
+        top.annotate(
+            animes.index[i],
+            xy=(bar.get_x() + bar.get_width() / 2, h),
+            xytext=(0, 3),  # 3 points vertical offset
+            textcoords="offset points",
+            rotation=90,
+            ha='center',
+            va='bottom')
 
     bleft_bar = bleft.bar(weekdays.index, weekdays, color=colors)
     bleft.set_ylabel('Hours')
@@ -106,4 +119,6 @@ with plt.style.context("ggplot"):
                    c=daily.dayofweek.map(days_color))
     bright.xaxis.set_major_formatter(DateFormatter("%b-%d"))
 
-plt.show()
+# plt.show()
+plt.savefig("/tmp/test.png")
+print("/tmp/test.png")

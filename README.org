@@ -115,6 +115,8 @@ The ~process.py~ processes the log and ~visualize.py~ is for visualization. Here
 
 [[./extras/plot.png]]
 
+The gaps in the plot with no anime watchtime isn't me being responsible but rather the time it was broke and I was watching it in the browser. 
+
 * Known Bugs
 - Sometimes the input has residue texts from long command lines.
 - Sometimes the mpv can't stream the stream link obtained with 403: Forbidden error.

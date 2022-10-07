@@ -199,6 +199,11 @@ the effect of configurations which won't be saved.
     def complete_geometry(self, *ignored):
         return utils.completion_list([config.geometry])
 
+    def do_canon(self, inp):
+        """Available list of Canon Episodes.
+        """
+        commands.check_canon(inp.split())
+
     def do_fullscreen(self, inp):
         """Toggles the fullscreen setting for external player.
         """

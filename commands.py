@@ -93,6 +93,12 @@ def anime_log(args):
         outputs.normal_info()
 
 
+def check_canon(args):
+    name, episodes = read_args(args, episodes=False)
+    eps = utils.canon_episodes(name, episodes)
+    outputs.normal_info(eps)
+
+
 def play_anime(args):
     name, episodes = read_args(args)
     for e in episodes:
