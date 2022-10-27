@@ -374,7 +374,7 @@ related commands: continue, web, streamurl
             log = utils.read_log(name)
             if not log:
                 return ["1"]
-            ep = utils.Log(log).eps.split('-')[-1]
+            ep = re.split("[-,]", utils.Log(log).eps)[-1]
             return [str(int(ep) + 1)]
         return self.completedefault(text, line, *ignored)
 

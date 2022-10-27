@@ -38,7 +38,7 @@ while i < len(filt_index)-1:
 
 daily = daily[filt_index]
 
-weekdays = daily.groupby('dayofweek').watchtime.mean() / 3600
+weekdays = daily[daily.watchtime > 0].groupby('dayofweek').watchtime.mean() / 3600
 days_dict = {d: i for i, d in enumerate(calendar.day_name)}
 colors = [
     'tab:blue', 'tab:pink', 'tab:gray', 'tab:orange', 'tab:purple',
@@ -117,7 +117,7 @@ with plt.style.context("ggplot"):
     bright.scatter(daily.date,
                    daily.watchtime / 3600,
                    c=daily.dayofweek.map(days_color))
-    bright.xaxis.set_major_formatter(DateFormatter("%b-%d"))
+    bright.xaxis.set_major_formatter(DateFormatter("Y%yM%m"))
 
 # plt.show()
 plt.savefig("/tmp/test.png")
